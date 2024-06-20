@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <format>
+#include <utility>
 
 Button::Button(const sf::Vector2f &position, const sf::Vector2f &size, const std::string &text,
                const ButtonStyle &style) : m_text(text, style.font, style.textSize), m_shape(size), m_style(style)
@@ -96,4 +97,72 @@ void Button::render()
     // Render the button
     GeometryDash::getInstance().getWindow().getWindow().draw(m_shape);
     GeometryDash::getInstance().getWindow().getWindow().draw(m_text);
+}
+
+IconButton::IconButton(const sf::Vector2f &position, const sf::Vector2f &size, const sf::Texture &texture,
+                       ButtonStyle style) : m_sprite(texture), m_shape(size), m_style(std::move(style))
+{
+    m_shape.setPosition(position);
+    m_shape.setFillColor(m_style.backgroundColor);
+    m_shape.setOutlineColor(m_style.borderColor);
+    m_shape.setOutlineThickness(m_style.borderThickness);
+}
+
+void IconButton::update()
+{
+    if (m_wasPressed)
+    {
+        m_wasPressed = false;
+    }
+
+    bool clicked = false;
+    m_hovered = false;
+    if (m_shape.getGlobalBounds().contains(
+                sf::Vector2f(sf::Mouse::getPosition(GeometryDash::getInstance().getWindow().getWindow()))))
+    {
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            clicked = true;
+        }
+        else
+        {
+            m_hovered = true;
+        }
+    }
+    if (m_active == true and clicked == false)
+    {
+        m_wasPressed = true;
+        if (m_clickedCallback)
+        {
+            m_clickedCallback();
+        }
+    }
+    m_active = clicked;
+}
+
+void IconButton::render()
+{
+    if (m_active)
+    {
+        m_shape.setFillColor(m_style.activeColor);
+    }
+    else if (m_hovered)
+    {
+        m_shape.setFillColor(m_style.hoverColor);
+    }
+    else
+    {
+        m_shape.setFillColor(m_style.backgroundColor);
+    }
+
+    m_shape.setOutlineColor(m_style.borderColor);
+    m_shape.setOutlineThickness(m_style.borderThickness);
+    m_shape.setPosition(m_shape.getPosition());
+    m_shape.setSize(m_shape.getSize());
+
+    m_sprite.setOrigin(m_sprite.getGlobalBounds().getSize() / 2.0f + m_sprite.getLocalBounds().getPosition());
+    m_sprite.setPosition(m_shape.getPosition() + (m_shape.getSize() / 2.0f));
+
+    GeometryDash::getInstance().getWindow().getWindow().draw(m_sprite);
+    GeometryDash::getInstance().getWindow().getWindow().draw(m_shape);
 }

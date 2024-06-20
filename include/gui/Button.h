@@ -73,3 +73,45 @@ private:
 
     std::function<void()> m_clickedCallback;
 };
+
+class IconButton
+{
+public:
+    IconButton(const sf::Vector2f &position, const sf::Vector2f &size, const sf::Texture &texture, ButtonStyle style);
+
+    void setTexture(const sf::Texture &texture) { m_sprite.setTexture(texture); }
+    const sf::Texture *getTexture() const { return m_sprite.getTexture(); }
+
+    void update();
+    void render();
+
+    void setSize(const sf::Vector2f &size) { m_shape.setSize(size); }
+    void setPosition(const sf::Vector2f &position) { m_shape.setPosition(position); }
+    void setStyle(const ButtonStyle &style) { m_style = style; }
+
+    sf::Vector2f getSize() const { return m_shape.getSize(); }
+    sf::Vector2f getPosition() const { return m_shape.getPosition(); }
+    ButtonStyle getStyle() const { return m_style; }
+
+    bool isHovered() const { return m_hovered; }
+    bool isActive() const { return m_active; }
+    bool wasPressed() const { return m_wasPressed; }
+    void click()
+    {
+        m_clickedCallback();
+        m_wasPressed = true;
+    }
+
+    void setClickedCallback(const std::function<void()> &callback) { m_clickedCallback = callback; }
+
+private:
+    sf::Sprite m_sprite;
+    sf::RectangleShape m_shape;
+    ButtonStyle m_style;
+
+    bool m_hovered = false;
+    bool m_active = false;
+    bool m_wasPressed = false;
+
+    std::function<void()> m_clickedCallback;
+};
