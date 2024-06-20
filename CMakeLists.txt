@@ -9,8 +9,17 @@ add_subdirectory(dependencies)
 
 add_executable(GeometryDash2
         # Headers
+        include/GeometryDash.h
+        include/Window.h
+        include/State.h
+        include/MainMenuState.h
+        include/gui/Button.h
 
         # Source Files
+        src/gui/Button.cpp
+        src/MainMenuState.cpp
+        src/GeometryDash.cpp
+        src/Window.cpp
         src/main.cpp
 )
 

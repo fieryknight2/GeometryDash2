@@ -1,0 +1,9 @@
+Font: Mangabey
+license: Freeware
+link: https://www.fontspace.com/mangabey-font-f68391
+Designed By: Niskala Huruf
+
+Font: Pasta
+license: Public Domain
+link: https://www.fontspace.com/tjf-pasta-font-f117326
+Designed By: The Jigsaw Foundry
