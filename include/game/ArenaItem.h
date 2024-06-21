@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -22,7 +23,7 @@ enum class ArenaItemType
 class ArenaItem
 {
 public:
-    ArenaItem(const sf::Texture &texture, const sf::Vector2f &position, const sf::Vector2f &size,
+    ArenaItem(const std::shared_ptr<sf::Texture> &texture, const sf::Vector2f &position, const sf::Vector2f &size,
               const sf::Vector2i &frameCount, const sf::Vector2i &padding, int frame);
     ~ArenaItem() = default;
 
@@ -41,23 +42,27 @@ public:
     void setType(const ArenaItemType type) { m_type = type; }
     [[nodiscard]] ArenaItemType getType() const { return m_type; }
 
-    // Callbacks for custom collision and update logic
-    std::function<void(uint64_t)> getOnCollision() const { return m_onCollision; }
-    std::function<void(uint64_t)> getOnUpdate() const { return m_onUpdate; }
+    [[nodiscard]] bool collides(const sf::FloatRect &shape);
 
-    void setOnCollision(const std::function<void(uint64_t)> &onCollision) { m_onCollision = onCollision; }
-    void setOnUpdate(const std::function<void(uint64_t)> &onUpdate) { m_onUpdate = onUpdate; }
+    // Callbacks for custom collision and update logic
+    std::function<void()> getOnCollision() const { return m_onCollision; }
+    std::function<void()> getOnUpdate() const { return m_onUpdate; }
+
+    void setOnCollision(const std::function<void()> &onCollision) { m_onCollision = onCollision; }
+    void setOnUpdate(const std::function<void()> &onUpdate) { m_onUpdate = onUpdate; }
 
     void setFlippedHorizontally(const bool flipped) { m_flippedHorizontally = flipped; }
     void setFlippedVertically(const bool flipped) { m_flippedVertically = flipped; }
     void setFlippedDiagonally(const bool flipped) { m_flippedDiagonally = flipped; }
+
+    static void resetIds();
 
 private:
     static uint64_t s_idCounter;
     uint64_t m_id = 0;
 
     sf::Sprite m_sprite;
-    sf::Texture m_texture;
+    std::shared_ptr<sf::Texture> m_texture;
 
     sf::Vector2f m_position;
     sf::Vector2f m_relativePosition;
@@ -67,8 +72,8 @@ private:
 
     ArenaItemType m_type{ArenaItemType::None};
 
-    std::function<void(uint64_t)> m_onCollision;
-    std::function<void(uint64_t)> m_onUpdate;
+    std::function<void()> m_onCollision;
+    std::function<void()> m_onUpdate;
 
     sf::Vector2i m_texFrameCount;
     int m_minFrame;

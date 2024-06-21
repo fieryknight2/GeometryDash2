@@ -70,7 +70,7 @@ void GeometryDash::run() noexcept(false)
     SL_LOG_INFO("Exiting GeometryDash");
     if (m_state)
     {
-        SL_LOG_DEBUG(std::format("Destroying state {}", m_state->getName()));
+        SL_LOGF_DEBUG("Quitting from state {}", m_state->getName());
         m_state->destroy();
     }
     SL_LOG_DEBUG("Destroying Window");

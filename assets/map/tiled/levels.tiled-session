@@ -9,16 +9,20 @@
             "scaleInEditor": 1
         },
         "level-1.tmx": {
-            "scale": 0.5,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": -336,
-                "y": 1009
+                "x": 196,
+                "y": 2892.5
             }
         },
         "level-1.tmx#Simple White Tileset": {
             "dynamicWrapping": true,
             "scaleInEditor": 3
+        },
+        "level-1.tmx#SimpleTileSet": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1.5
         },
         "level-1.tmx#SimpleTileset": {
             "dynamicWrapping": false
@@ -36,7 +40,7 @@
         "level-1.tmx"
     ],
     "tileset.embedInMap": true,
-    "tileset.margin": 1,
+    "tileset.margin": 0,
     "tileset.spacing": 2,
     "tileset.tileSize": {
         "height": 64,

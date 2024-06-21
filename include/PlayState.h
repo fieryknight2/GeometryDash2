@@ -8,6 +8,7 @@
 #include <memory>
 #include "State.h"
 #include "game/Arena.h"
+#include "game/Player.h"
 #include "gui/Button.h"
 
 class PlayState final : public State
@@ -19,6 +20,7 @@ public:
     void update() override;
     void render() override;
     void destroy() override;
+    void handleEvent(const sf::Event &event) override;
 
     Arena &getArena() { return m_arena; }
     // Player &getPlayer() { return m_player; }
@@ -34,9 +36,10 @@ private:
     IconButton m_settingsButton;
     sf::Texture m_settingsTexture;
     sf::Texture m_pauseTexture;
+    sf::Texture m_playerTexture;
 
     Arena m_arena;
-    // Player m_player;
+    Player m_player{};
 
     double m_updateCount = 1.0;
     int m_avgFPS = 0;

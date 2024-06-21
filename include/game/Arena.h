@@ -36,6 +36,8 @@ public:
 
     [[nodiscard]] ArenaItem *getObject(uint64_t id);
 
+    [[nodiscard]] ArenaItem *collidePlayer(const sf::FloatRect &shape);
+
 private:
     sf::Vector2i m_size;
     sf::Vector2f m_viewportSize;
@@ -50,7 +52,7 @@ private:
     sf::Vector2i m_tileSize;
 
     // ID to Image
-    std::unordered_map<int, sf::Texture> m_textures;
+    std::unordered_map<int, std::shared_ptr<sf::Texture>> m_textures;
 
     bool parseLayer(const std::string &layer, sf::Vector2i tileSize);
 

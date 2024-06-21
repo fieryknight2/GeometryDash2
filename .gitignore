@@ -31,6 +31,17 @@
 *.out
 *.app
 
+# Default log file
+/GeometryDash.log
+
+# Clion
 /cmake-build*
 /.idea
-/GeometryDash.log
+
+# VS 
+/out
+/.vs
+CmakeSettings.json
+
+# Pixelorama project files
+*.pxo

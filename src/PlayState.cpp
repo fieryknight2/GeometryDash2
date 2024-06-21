@@ -1,14 +1,16 @@
 /* Created by Matthew Brown on 6/19/2024 */
 #include "PlayState.h"
 #include "GeometryDash.h"
+#include "game/PauseState.h"
 #include "simplelogger.hpp"
 
-#include <algorithm>
 #include <cmath>
 #include <format>
 
 void PlayState::create()
 {
+    ArenaItem::resetIds();
+
     SL_LOG_DEBUG("Loading Mangabey font");
     if (!m_defaultFont.loadFromFile("assets/fonts/mangabey-regular.otf"))
     {
@@ -45,7 +47,7 @@ void PlayState::create()
     m_fpsCounter.setFont(m_defaultFont);
     m_fpsCounter.setCharacterSize(30);
     m_fpsCounter.setPosition(sf::Vector2f(5, 5));
-    m_fpsCounter.setFillColor(sf::Color::White);
+    m_fpsCounter.setFillColor(sf::Color::Black);
     m_fpsCounter.setString("FPS: 0");
 
     if (!m_arena.loadFromFile("assets/map/tiled/level-1.tmx"))
@@ -56,7 +58,15 @@ void PlayState::create()
     m_arena.setViewportSize(sf::Vector2f(GeometryDash::getInstance().getWindow().getWindow().getSize()));
     m_arena.setScrollSpeed(sf::Vector2f(250, 0));
 
-    GeometryDash::getInstance().getWindow().setClearColor(sf::Color::Black);
+    if (!m_playerTexture.loadFromFile("assets/player.png"))
+    {
+        SL_LOG_FATAL("Failed to load player image");
+    }
+
+    m_player = Player(m_playerTexture, sf::Vector2f(150, 300), sf::Vector2f(100, 100),
+                      PlayerAnimator(sf::Vector2f(64, 64), sf::Vector2i(), 0, 0, 10, sf::Vector2i(0, 0)));
+
+    GeometryDash::getInstance().getWindow().setClearColor(sf::Color::White);
 }
 
 void PlayState::update()
@@ -74,21 +84,71 @@ void PlayState::update()
         m_updateCount += GeometryDash::getInstance().getDeltaTime().asSeconds();
     }
 
+    m_pauseButton.update();
+    m_settingsButton.update();
+
+    if (m_pauseButton.wasPressed())
+    {
+        SL_LOG_DEBUG("Toggling pause");
+        m_isPaused = !m_isPaused;
+
+        if (m_topState)
+        {
+            m_topState->destroy();
+        }
+        else
+        {
+            m_topState = std::make_unique<PauseState>();
+            m_topState->create();
+        }
+    }
+
     if (m_isPaused == false)
     {
-        m_pauseButton.update();
-        m_settingsButton.update();
 
         // std::ranges::sort(m_gameObjects, [](const std::shared_ptr<GameObject> &a, const std::shared_ptr<GameObject>
         // &b)
         //                   { return a->getId() < b->getId(); });
         m_arena.update();
-    }
-    else
-    {
-        if (m_topState)
+        m_player.update(m_arena);
+
+        if (m_player.isDead() or
+            m_player.getPosition().y >
+                    static_cast<float>(GeometryDash::getInstance().getWindow().getWindow().getSize().y))
         {
-            m_topState->update();
+            // Restart
+
+            // Temp
+            GeometryDash::getInstance().changeState(std::make_unique<PlayState>());
+        }
+    }
+}
+
+void PlayState::handleEvent(const sf::Event &event)
+{
+    if (event.type == sf::Event::Closed)
+    {
+    }
+    else if (event.type == sf::Event::KeyPressed)
+    {
+        switch (event.key.code)
+        {
+            case sf::Keyboard::Escape:
+                SL_LOG_DEBUG("Toggling pause");
+                m_isPaused = !m_isPaused;
+                if (m_topState)
+                {
+                    m_topState->destroy();
+                }
+                else
+                {
+                    m_topState = std::make_unique<PauseState>();
+                    m_topState->create();
+                }
+
+                break;
+            default:
+                break;
         }
     }
 }
@@ -99,11 +159,12 @@ void PlayState::render()
     GeometryDash::getInstance().getWindow().getWindow().draw(m_fpsCounter);
 
     m_arena.render();
+    m_player.render();
 
     m_pauseButton.render();
     m_settingsButton.render();
 
-    if (m_topState)
+    if (m_isPaused and m_topState)
     {
         m_topState->render();
     }

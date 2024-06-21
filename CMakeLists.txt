@@ -18,8 +18,12 @@ add_executable(GeometryDash2
         include/game/GameObject.h
         include/game/Arena.h
         include/game/ArenaItem.h
+        include/game/PauseState.h
+        include/game/Player.h
 
         # Source Files
+        src/game/Player.cpp
+        src/game/PauseState.cpp
         src/game/Arena.cpp
         src/game/ArenaItem.cpp
         src/gui/Button.cpp
@@ -72,3 +76,10 @@ if (WIN32)
             $<TARGET_FILE_DIR:GeometryDash2>
     )
 endif ()
+
+# Install
+add_custom_command(TARGET GeometryDash2 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:GeometryDash2>/assets
+)

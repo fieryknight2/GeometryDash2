@@ -204,8 +204,8 @@ bool Arena::loadFromFile(const std::string &filePath)
     std::string folder = getFileFolder(filePath);
     for (auto iter = tileSet->tiles.begin(); iter != tileSet->tiles.end(); ++i, ++iter)
     {
-        sf::Texture texture;
-        if (!texture.loadFromFile(folder + OS_SEP + iter->texture))
+        auto texture = std::make_shared<sf::Texture>();
+        if (!texture->loadFromFile(folder + OS_SEP + iter->texture))
         {
             SL_LOG_FATAL(std::format("Failed to load texture {}", folder + OS_SEP + iter->texture));
             return false;
@@ -341,12 +341,47 @@ bool Arena::parseLayer(const std::string &layer, sf::Vector2i tileSize)
     return true;
 }
 
+ArenaItem *Arena::collidePlayer(const sf::FloatRect &shape)
+{
+    /* There is a potential edge case here not handled where the
+     player collides with 2 tiles in the same frame, in that case it should
+     just collide randomly and should not make a difference to the gameplay */
+    for (auto &arenaItem: m_objects)
+    {
+        // Only collide items in the viewport
+        if (arenaItem.getPosition().x > m_position.x + m_viewportSize.x + static_cast<float>(m_tileSize.x * 2) or
+            arenaItem.getPosition().x < m_position.x - m_viewportSize.x - static_cast<float>(m_tileSize.x * 2))
+            continue;
+        if (arenaItem.getPosition().y > m_position.y + m_viewportSize.y + static_cast<float>(m_tileSize.y * 2) or
+            arenaItem.getPosition().y < m_position.y - m_viewportSize.y - static_cast<float>(m_tileSize.y * 2))
+            continue;
+
+        // Shift the rect by m_position
+        // rect.top = (arenaItem.getPosition() + m_position).y;
+        // rect.left = (arenaItem.getPosition() + m_position).x;
+        // rect.width = arenaItem.getSize().x;
+        // rect.height = arenaItem.getSize().y;
+        //
+        // if (rect.intersects(shape))
+        // {
+        //     return &arenaItem;
+        // };
+        if (arenaItem.collides(shape))
+        {
+            return &arenaItem;
+        }
+    }
+
+    return nullptr;
+}
+
 void Arena::update()
 {
     m_position += m_scrollSpeed * GeometryDash::getInstance().getDeltaTime().asSeconds();
 
     for (auto &arenaItem: m_objects)
     {
+        arenaItem.setRelativePosition(m_position);
         // Only update items that are in the viewport
         if (arenaItem.getPosition().x > m_position.x + m_viewportSize.x + static_cast<float>(m_tileSize.x * 2) or
             arenaItem.getPosition().x < m_position.x - m_viewportSize.x - static_cast<float>(m_tileSize.x * 2))
