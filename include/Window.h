@@ -38,7 +38,12 @@ public:
     sf::RenderWindow &getWindow() { return m_window; }
     bool isOpen() const { return m_window.isOpen(); }
 
+    sf::Color getClearColor() const { return m_clearColor; }
+    void setClearColor(const sf::Color &color) { m_clearColor = color; }
+
 private:
+    sf::Color m_clearColor{0, 0, 0};
+
     sf::RenderWindow m_window;
     sf::VideoMode m_mode;
 };

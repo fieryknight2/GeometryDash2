@@ -8,6 +8,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(sfml)
 
+set(ENABLE_STD_FORMAT ON CACHE BOOL "Enable std::format")
 message(STATUS "Fetching SimpleLogger")
 FetchContent_Declare(
         simplelogger
@@ -16,3 +17,11 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(simplelogger)
+
+message(STATUS "Fetching TinyXML2")
+UNSET(BUILD_SHARED_LIBS)
+FetchContent_Declare(
+        tinyxml2
+        URL https://github.com/leethomason/tinyxml2/archive/refs/tags/10.0.0.zip
+)
+FetchContent_MakeAvailable(tinyxml2)

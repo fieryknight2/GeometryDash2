@@ -14,10 +14,11 @@ void GeometryDash::changeState(const std::shared_ptr<State> &state) noexcept(fal
     // Verify
     if (m_state != state and state != nullptr)
     {
-        SL_LOG_DEBUG(std::format("Changing state from {} to {}", m_state->getName(), state->getName()));
+        SL_LOGF_DEBUG("Changing state from {} to {}", m_state->getName(), state->getName());
         m_state->destroy();
         // Shared pointer automatically deletes the old state
         m_state = state;
+        m_state->create();
     }
 }
 
@@ -26,7 +27,7 @@ void GeometryDash::run() noexcept(false)
     SL_LOG_INFO("Starting GeometryDash");
     SL_LOG_INFO("Creating Window");
 
-    m_window.create(WindowSettings({800, 600}, "Geometry Dash"));
+    m_window.create(WindowSettings({1200, 800}, "Geometry Dash"));
 
     SL_LOG_DEBUG("Creating Main Menu state");
     m_state = std::make_unique<MainMenuState>();

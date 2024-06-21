@@ -2,6 +2,7 @@
 
 #include "MainMenuState.h"
 #include "GeometryDash.h"
+#include "PlayState.h"
 
 #include <cmath>
 
@@ -53,14 +54,17 @@ void MainMenuState::create()
     m_fpsCounter.setCharacterSize(30);
     m_fpsCounter.setPosition(sf::Vector2f(5, 5));
     m_fpsCounter.setFillColor(sf::Color::Black);
-    m_fpsCounter.setString("00");
+    m_fpsCounter.setString("FPS: 0");
+
+    GeometryDash::getInstance().getWindow().setClearColor(sf::Color::White);
 }
 
 void MainMenuState::update()
 {
     // Update the menu
-    m_avgFPS =
-            static_cast<int>(std::floor(1000 / GeometryDash::getInstance().getDeltaTime().asSeconds())) + m_avgFPS / 2;
+    m_avgFPS = static_cast<int>((std::floor(1000 / GeometryDash::getInstance().getDeltaTime().asMilliseconds())) +
+                                static_cast<float>(m_avgFPS)) /
+               2;
     if (m_updateCount > 0.25)
     {
         m_updateCount = 0.0;
@@ -79,16 +83,20 @@ void MainMenuState::update()
     {
         GeometryDash::getInstance().getWindow().close();
     }
+    if (m_startButton.isActive())
+    {
+        GeometryDash::getInstance().changeState(std::make_shared<PlayState>());
+    }
 }
 
 void MainMenuState::render()
 {
+    GeometryDash::getInstance().getWindow().getWindow().draw(m_fpsCounter);
+
     // Render the menu
     m_startButton.render();
     m_optionsButton.render();
     m_exitButton.render();
-
-    GeometryDash::getInstance().getWindow().getWindow().draw(m_fpsCounter);
 }
 
 void MainMenuState::destroy()

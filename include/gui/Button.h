@@ -78,6 +78,7 @@ class IconButton
 {
 public:
     IconButton(const sf::Vector2f &position, const sf::Vector2f &size, const sf::Texture &texture, ButtonStyle style);
+    IconButton();
 
     void setTexture(const sf::Texture &texture) { m_sprite.setTexture(texture); }
     const sf::Texture *getTexture() const { return m_sprite.getTexture(); }

@@ -26,6 +26,6 @@ private:
     sf::Text m_fpsCounter;
     sf::Font m_defaultFont;
 
-    double m_updateCount = 0.0;
+    double m_updateCount = 1.0; // Allow it to update immediately
     int m_avgFPS = 0;
 };

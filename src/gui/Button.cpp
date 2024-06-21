@@ -18,7 +18,7 @@ Button::Button(const sf::Vector2f &position, const sf::Vector2f &size, const std
     m_shape.setOutlineThickness(m_style.borderThickness);
 }
 
-Button::Button() : m_text(), m_shape(), m_style() {}
+Button::Button() = default;
 
 void Button::update()
 {
@@ -69,8 +69,6 @@ void Button::render()
 
     m_shape.setOutlineColor(m_style.borderColor);
     m_shape.setOutlineThickness(m_style.borderThickness);
-    m_shape.setPosition(m_shape.getPosition());
-    m_shape.setSize(m_shape.getSize());
 
     // Text settings
     m_text.setFont(m_style.font);
@@ -107,6 +105,8 @@ IconButton::IconButton(const sf::Vector2f &position, const sf::Vector2f &size, c
     m_shape.setOutlineColor(m_style.borderColor);
     m_shape.setOutlineThickness(m_style.borderThickness);
 }
+
+IconButton::IconButton() = default;
 
 void IconButton::update()
 {
@@ -157,12 +157,15 @@ void IconButton::render()
 
     m_shape.setOutlineColor(m_style.borderColor);
     m_shape.setOutlineThickness(m_style.borderThickness);
-    m_shape.setPosition(m_shape.getPosition());
-    m_shape.setSize(m_shape.getSize());
 
-    m_sprite.setOrigin(m_sprite.getGlobalBounds().getSize() / 2.0f + m_sprite.getLocalBounds().getPosition());
-    m_sprite.setPosition(m_shape.getPosition() + (m_shape.getSize() / 2.0f));
+    // Scale the sprite to fit the button
+    m_sprite.setScale((m_shape.getSize().x - static_cast<float>(m_style.padding) * 2) /
+                              static_cast<float>(m_sprite.getTexture()->getSize().x),
+                      (m_shape.getSize().y - static_cast<float>(m_style.padding) * 2) /
+                              static_cast<float>(m_sprite.getTexture()->getSize().y));
+    m_sprite.setPosition(m_shape.getPosition() +
+                         sf::Vector2f(static_cast<float>(m_style.padding), static_cast<float>(m_style.padding)));
 
-    GeometryDash::getInstance().getWindow().getWindow().draw(m_sprite);
     GeometryDash::getInstance().getWindow().getWindow().draw(m_shape);
+    GeometryDash::getInstance().getWindow().getWindow().draw(m_sprite);
 }

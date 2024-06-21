@@ -10,7 +10,7 @@ void Window::create(const WindowSettings &settings)
 
 void Window::close() { m_window.close(); }
 
-void Window::clear() { m_window.clear(sf::Color::White); }
+void Window::clear() { m_window.clear(m_clearColor); }
 
 void Window::render() { m_window.display(); }
 
