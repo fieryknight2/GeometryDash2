@@ -33,6 +33,7 @@ public:
     void render();
 
     void setRelativePosition(const sf::Vector2f &position) { m_relativePosition = position; }
+    sf::Vector2f getRelativePosition() const { return m_relativePosition; }
 
     [[nodiscard]] sf::Vector2f getPosition() const { return m_position; }
     [[nodiscard]] sf::Vector2f getSize() const { return m_size; }
