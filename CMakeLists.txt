@@ -20,8 +20,10 @@ add_executable(GeometryDash2
         include/game/ArenaItem.h
         include/game/PauseState.h
         include/game/Player.h
+        include/AssetManager.h
 
         # Source Files
+        src/AssetManager.cpp
         src/game/Player.cpp
         src/game/PauseState.cpp
         src/game/Arena.cpp

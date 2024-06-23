@@ -7,24 +7,23 @@
 #include <cmath>
 #include <format>
 
+#include "AssetManager.h"
+
 void PlayState::create()
 {
     ArenaItem::resetIds();
 
-    SL_LOG_DEBUG("Loading Mangabey font");
-    if (!m_defaultFont.loadFromFile("assets/fonts/mangabey-regular.otf"))
-    {
-        SL_LOG_FATAL("Failed to load font");
-    }
-    SL_LOG_DEBUG("Loading icons");
-    if (!m_settingsTexture.loadFromFile("assets/icons/Settings.png"))
-    {
-        SL_LOG_FATAL("Failed to load settings icon");
-    }
-    if (!m_pauseTexture.loadFromFile("assets/icons/Pause.png"))
-    {
-        SL_LOG_FATAL("Failed to load pause icon");
-    }
+    AssetManager::getInstance().loadTexture("assets/player.png", "player");
+    AssetManager::getInstance().loadTexture("assets/icons/Settings.png", "settings");
+    AssetManager::getInstance().loadTexture("assets/icons/Pause.png", "pause");
+    AssetManager::getInstance().loadFont("assets/fonts/mangabey-regular.otf", "mangabey");
+    AssetManager::getInstance().loadLevel("assets/map/tiled/level-1.tmx", "level-1");
+
+    m_defaultFont = AssetManager::getInstance().getFont("mangabey");
+    m_playerTexture = AssetManager::getInstance().getTexture("player");
+    m_settingsTexture = AssetManager::getInstance().getTexture("settings");
+    m_pauseTexture = AssetManager::getInstance().getTexture("pause");
+
     m_settingsTexture.setSmooth(true);
     m_pauseTexture.setSmooth(true);
 
@@ -50,20 +49,12 @@ void PlayState::create()
     m_fpsCounter.setFillColor(sf::Color::Black);
     m_fpsCounter.setString("FPS: 0");
 
-    if (!m_arena.loadFromFile("assets/map/tiled/level-1.tmx"))
-    {
-        SL_LOG_FATAL("Failed to load map");
-    }
+    m_arena = AssetManager::getInstance().getLevel("level-1");
 
     m_arena.setViewportSize(sf::Vector2f(GeometryDash::getInstance().getWindow().getWindow().getSize()));
     m_arena.setScrollSpeed(sf::Vector2f(250, 0));
 
-    if (!m_playerTexture.loadFromFile("assets/player.png"))
-    {
-        SL_LOG_FATAL("Failed to load player image");
-    }
-
-    m_player = Player(m_playerTexture, sf::Vector2f(150, 300), sf::Vector2f(100, 100),
+    m_player = Player(m_playerTexture, sf::Vector2f(150, 300), sf::Vector2f(64, 64),
                       PlayerAnimator(sf::Vector2f(64, 64), sf::Vector2i(), 0, 0, 10, sf::Vector2i(0, 0)));
 
     GeometryDash::getInstance().getWindow().setClearColor(sf::Color::White);

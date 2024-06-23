@@ -6,6 +6,7 @@
 
 #include <cmath>
 
+#include "AssetManager.h"
 #include "SFML/Graphics/Font.hpp"
 #include "simplelogger.hpp"
 
@@ -14,11 +15,8 @@ void MainMenuState::create()
     constexpr int buttonWidth = 200;
     constexpr int buttonHeight = 50;
 
-    SL_LOG_DEBUG("Loading Mangabey font");
-    if (!m_defaultFont.loadFromFile("assets/fonts/mangabey-regular.otf"))
-    {
-        SL_LOG_FATAL("Failed to load font");
-    }
+    AssetManager::getInstance().loadFont("assets/fonts/mangabey-regular.otf", "mangabey");
+    m_defaultFont = AssetManager::getInstance().getFont("mangabey");
 
     // Create the button style
     static ButtonStyle mainMenuButtonStyle{sf::Color::White,
