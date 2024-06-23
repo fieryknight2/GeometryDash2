@@ -27,7 +27,7 @@ void GeometryDash::run() noexcept(false)
     SL_LOG_INFO("Starting GeometryDash");
     SL_LOG_INFO("Creating Window");
 
-    m_window.create(WindowSettings({1200, 800}, "Geometry Dash"));
+    m_window.create(WindowSettings({1200, 800}, "Geometry Dash", sf::Style::Titlebar | sf::Style::Close));
 
     SL_LOG_DEBUG("Creating Main Menu state");
     m_state = std::make_unique<MainMenuState>();
