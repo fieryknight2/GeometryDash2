@@ -9,13 +9,13 @@ AssetManager &AssetManager::getInstance() { return AssetManager::S_instance; }
 
 bool AssetManager::loadTexture(const std::string &filePath, const std::string &id)
 {
-    SL_LOGF_INFO("Loading texture <{}> with id: {}", filePath, id);
     if (m_textures.contains(id))
     {
         // Already loaded, don't waste your time
         SL_LOGF_DEBUG("Attempted to reload texture with id <{}>", id);
         return true;
     }
+    SL_LOGF_INFO("Loading texture <{}> with id: {}", filePath, id);
 
     sf::Texture texture;
     if (!texture.loadFromFile(filePath))
@@ -41,13 +41,13 @@ sf::Texture &AssetManager::getTexture(const std::string &id)
 
 bool AssetManager::loadFont(const std::string &filePath, const std::string &id)
 {
-    SL_LOGF_INFO("Loading font <{}> with id: {}", filePath, id);
     if (m_fonts.contains(id))
     {
         // Already loaded, don't waste your time
         SL_LOGF_DEBUG("Attempted to reload font with id <{}>", id);
         return true;
     }
+    SL_LOGF_INFO("Loading font <{}> with id: {}", filePath, id);
 
     sf::Font font;
     if (!font.loadFromFile(filePath))
@@ -72,13 +72,13 @@ sf::Font &AssetManager::getFont(const std::string &id)
 
 bool AssetManager::loadLevel(const std::string &filePath, const std::string &id)
 {
-    SL_LOGF_INFO("Loading level <{}> with id: {}", filePath, id);
     if (m_arenas.contains(id))
     {
         // Already loaded, don't waste your time
         SL_LOGF_DEBUG("Attempted to reload level with id <{}>", id);
         return true;
     }
+    SL_LOGF_INFO("Loading level <{}> with id: {}", filePath, id);
 
     Arena arena;
     if (!arena.loadFromFile(filePath))
