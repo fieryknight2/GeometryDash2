@@ -55,7 +55,7 @@ void PlayState::create()
     m_arena.setViewportSize(sf::Vector2f(GeometryDash::getInstance().getWindow().getWindow().getSize()));
     m_arena.setScrollSpeed(sf::Vector2f(250, 0));
 
-    m_player = Player(m_playerTexture, sf::Vector2f(150, 300), sf::Vector2f(64, 64),
+    m_player = Player(m_playerTexture, sf::Vector2f(150, 300), sf::Vector2f(32, 32),
                       PlayerAnimator(sf::Vector2f(64, 64), sf::Vector2i(), 0, 0, 10, sf::Vector2i(0, 0)));
 
     GeometryDash::getInstance().getWindow().setClearColor(sf::Color::White);

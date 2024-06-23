@@ -11,12 +11,14 @@
 
 #include "game/Arena.h"
 
-constexpr float GRAVITY = 1200;
-constexpr float JUMP_SPEED = -100;
-constexpr float JUMP_VELOCITY = -200;
-constexpr float MAX_VELOCITY = 600;
-constexpr float MAX_ACCELERATION = 600;
-constexpr float DEATH_THRESHOLD = -100;
+constexpr float GRAVITY = 3800;
+constexpr float JUMP_SPEED = 150;
+constexpr float JUMP_VELOCITY = -600;
+constexpr float MAX_VELOCITY = 800;
+constexpr float MAX_ACCELERATION = 1200;
+constexpr float DEATH_THRESHOLD = 5;
+constexpr float ROTATION_SPEED = 0.001;
+constexpr float JUMP_THRESHOLD = 0.005;
 
 
 class PlayerAnimator
@@ -82,8 +84,12 @@ private:
     sf::Vector2f m_position{0, 0};
     sf::Vector2f m_size{64, 64};
 
+    // float m_rotation = 0;
     float m_velocity = 0;
     float m_acceleration = 0;
 
     PlayerAnimator m_animator;
+
+    bool m_holdingJump = false;
+    double m_holdJumpLength = 0;
 };
