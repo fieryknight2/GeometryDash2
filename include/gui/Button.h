@@ -89,6 +89,7 @@ public:
     void setSize(const sf::Vector2f &size) { m_shape.setSize(size); }
     void setPosition(const sf::Vector2f &position) { m_shape.setPosition(position); }
     void setStyle(const ButtonStyle &style) { m_style = style; }
+    void setFrame(int frame, const sf::Vector2i &frameCount);
 
     sf::Vector2f getSize() const { return m_shape.getSize(); }
     sf::Vector2f getPosition() const { return m_shape.getPosition(); }

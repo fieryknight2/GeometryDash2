@@ -2,6 +2,7 @@
 #include "PlayState.h"
 #include "GeometryDash.h"
 #include "game/PauseState.h"
+#include "game/SettingsState.h"
 #include "simplelogger.hpp"
 
 #include <cmath>
@@ -91,6 +92,7 @@ void PlayState::update()
         if (m_topState)
         {
             m_topState->destroy();
+            m_topState = nullptr;
         }
         else
         {
@@ -98,17 +100,61 @@ void PlayState::update()
             m_topState->create();
         }
     }
-    // if (m_settingsButton.wasPressed())
-    // {
-    //     SL_LOG_DEBUG("Opening settings");
-    //     m_isPaused = true;
-    //     m_topState = std::make_unique<SettingsState>();
-    //     m_topState->create();
-    // }
+
+    if (m_settingsButton.wasPressed())
+    {
+        if (m_topState and m_topState->getName() == "Settings")
+        {
+            return; // do nothing
+        }
+
+        SL_LOG_DEBUG("Opening settings");
+        m_isPaused = true;
+
+        if (m_topState and m_topState->getName() != "Settings")
+        {
+            m_topState->destroy();
+            m_topState = nullptr;
+        }
+        m_topState = std::make_unique<SettingsState>();
+        m_topState->create();
+        return;
+    }
+    if (m_topState and m_topState->getName() == "Settings")
+    {
+        m_topState->update();
+        const SettingsState *const temp = dynamic_cast<SettingsState *>(m_topState.get());
+        if (temp->quit())
+        {
+            m_topState->destroy();
+            m_topState = nullptr;
+        }
+        if (temp->continueGame())
+        {
+            m_topState->destroy();
+            m_topState = nullptr;
+            m_isPaused = false;
+        }
+        if (temp->restartGame())
+        {
+            m_topState->destroy();
+            m_topState = nullptr;
+
+            GeometryDash::getInstance().changeState(std::make_unique<PlayState>());
+        }
+        if (temp->toMenu())
+        {
+            m_topState->destroy();
+            m_topState = nullptr;
+            m_isPaused = false;
+
+            GeometryDash::getInstance().changeState(std::make_unique<MainMenuState>());
+        }
+        return;
+    }
 
     if (m_isPaused == false)
     {
-
         // std::ranges::sort(m_gameObjects, [](const std::shared_ptr<GameObject> &a, const std::shared_ptr<GameObject>
         // &b)
         //                   { return a->getId() < b->getId(); });
@@ -127,10 +173,11 @@ void PlayState::update()
 
         const float lerpSpeed =
                 std::min(1.0f, m_cameraSmoothSpeed * GeometryDash::getInstance().getDeltaTime().asSeconds());
-        // m_cameraPos.x = std::lerp(m_cameraPos.x, m_player.getPosition().x - m_cameraOffset.x, lerpSpeed);
-        // m_cameraPos.y = std::lerp(m_cameraPos.y, m_player.getPosition().y - m_cameraOffset.y, lerpSpeed);
-        // m_cameraPos.y = m_player.getPosition().y - m_cameraOffset.y;
         m_cameraPos.y = std::lerp(m_cameraPos.y, -m_player.getPosition().y + m_cameraOffset.y, lerpSpeed);
+    }
+    else
+    {
+        m_topState->update();
     }
 }
 
@@ -146,6 +193,7 @@ void PlayState::handleEvent(const sf::Event &event)
                 if (m_topState)
                 {
                     m_topState->destroy();
+                    m_topState = nullptr;
                 }
                 else
                 {
@@ -160,6 +208,11 @@ void PlayState::handleEvent(const sf::Event &event)
     }
 
     m_player.handleEvent(event);
+
+    if (m_topState)
+    {
+        m_topState->handleEvent(event);
+    }
 }
 
 void PlayState::render()

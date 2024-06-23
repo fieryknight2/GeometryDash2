@@ -15,12 +15,15 @@ add_executable(GeometryDash2
         include/MainMenuState.h
         include/PlayState.h
         include/gui/Button.h
+        include/gui/Slider.h
         include/game/GameObject.h
         include/game/Arena.h
         include/game/ArenaItem.h
         include/game/PauseState.h
+        include/game/SettingsState.h
         include/game/Player.h
         include/AssetManager.h
+        include/gui/Panel.h
 
         # Source Files
         src/AssetManager.cpp
@@ -28,7 +31,10 @@ add_executable(GeometryDash2
         src/game/PauseState.cpp
         src/game/Arena.cpp
         src/game/ArenaItem.cpp
+        src/game/SettingsState.cpp
         src/gui/Button.cpp
+        src/gui/Panel.cpp
+        src/gui/Slider.cpp
         src/PlayState.cpp
         src/MainMenuState.cpp
         src/GeometryDash.cpp

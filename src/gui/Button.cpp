@@ -159,13 +159,26 @@ void IconButton::render()
     m_shape.setOutlineThickness(m_style.borderThickness);
 
     // Scale the sprite to fit the button
-    m_sprite.setScale((m_shape.getSize().x - static_cast<float>(m_style.padding) * 2) /
-                              static_cast<float>(m_sprite.getTexture()->getSize().x),
-                      (m_shape.getSize().y - static_cast<float>(m_style.padding) * 2) /
-                              static_cast<float>(m_sprite.getTexture()->getSize().y));
+    m_sprite.setScale((m_shape.getSize().x - static_cast<float>(m_style.padding)) /
+                              static_cast<float>(m_sprite.getTextureRect().getSize().x),
+                      (m_shape.getSize().y - static_cast<float>(m_style.padding)) /
+                              static_cast<float>(m_sprite.getTextureRect().getSize().y));
     m_sprite.setPosition(m_shape.getPosition() +
                          sf::Vector2f(static_cast<float>(m_style.padding), static_cast<float>(m_style.padding)));
 
     GeometryDash::getInstance().getWindow().getWindow().draw(m_shape);
     GeometryDash::getInstance().getWindow().getWindow().draw(m_sprite);
+}
+
+void IconButton::setFrame(const int frame, const sf::Vector2i &frameCount)
+{
+    SL_ASSERT(frame >= 0, "Frame must be greater than or equal to zero");
+    SL_ASSERT(frameCount.x > 0 and frameCount.y > 0, "Frame count must be greater than zero");
+
+    const auto frameSize = sf::Vector2i(static_cast<int>(m_sprite.getTexture()->getSize().x) / frameCount.x,
+                                        static_cast<int>(m_sprite.getTexture()->getSize().y) / frameCount.y);
+    SL_ASSERT_FALSE(frameSize.x == 0 or frameSize.y == 0, "Frame size of zero is not allowed");
+
+    const auto framePos = sf::Vector2i(frame / frameCount.y, frame / frameCount.x);
+    m_sprite.setTextureRect(sf::IntRect(framePos.x * frameSize.x, framePos.y * frameSize.y, frameSize.x, frameSize.y));
 }
