@@ -40,7 +40,7 @@ std::string getFileFolder(const std::string &filePath)
 bool Arena::loadFromFile(const std::string &filePath)
 {
     tinyxml2::XMLDocument doc;
-    SL_LOG_INFO(std::format("Loading file: {}", filePath));
+    SL_LOG_DEBUG(std::format("Loading file: {}", filePath));
     if (doc.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS)
     {
         SL_LOG_FATAL(std::format("Failed to load file: {}", filePath));
@@ -57,7 +57,7 @@ bool Arena::loadFromFile(const std::string &filePath)
     // Process the nodes
     if (rootNode->Name() == std::string("map"))
     {
-        SL_LOG_INFO("Loading map");
+        SL_LOG_DEBUG("Loading map");
 
         if (rootNode->QueryIntAttribute("width", &m_size.x) != tinyxml2::XML_SUCCESS)
         {
@@ -198,7 +198,7 @@ bool Arena::loadFromFile(const std::string &filePath)
         SL_LOG_FATAL("Failed to load any tile sets");
         return false;
     }
-    SL_LOG_INFO(std::format("Loaded {}", filePath));
+    SL_LOG_DEBUG(std::format("Loaded {}", filePath));
 
     int i = 0;
     std::string folder = getFileFolder(filePath);
@@ -217,7 +217,7 @@ bool Arena::loadFromFile(const std::string &filePath)
     SL_LOG_DEBUG("Creating world");
     createWorld(*tileSet);
 
-    SL_LOG_INFO("Created arena");
+    SL_LOG_DEBUG("Created arena");
 
     return true;
 }
@@ -368,6 +368,7 @@ ArenaItem *Arena::collidePlayer(const sf::FloatRect &shape)
         // };
         if (arenaItem.collides(shape))
         {
+            arenaItem.setRelativePosition(m_position);
             return &arenaItem;
         }
     }

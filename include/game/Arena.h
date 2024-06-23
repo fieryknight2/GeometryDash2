@@ -28,11 +28,11 @@ public:
 
     [[nodiscard]] sf::Vector2i getSize() const { return m_size; }
     [[nodiscard]] sf::Vector2f getPosition() const { return m_position; }
+    void setPosition(const sf::Vector2f &position) { m_position = position; }
+    void setScrollSpeed(const sf::Vector2f &scrollSpeed) { m_scrollSpeed = scrollSpeed; }
 
     void setViewportSize(const sf::Vector2f &viewport) { m_viewportSize = viewport; }
     sf::Vector2f getViewportSize() const { return m_viewportSize; }
-    void setPosition(const sf::Vector2f &position) { m_position = position; }
-    void setScrollSpeed(const sf::Vector2f &scrollSpeed) { m_scrollSpeed = scrollSpeed; }
 
     [[nodiscard]] ArenaItem *getObject(uint64_t id);
 
