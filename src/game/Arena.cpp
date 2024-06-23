@@ -87,21 +87,16 @@ bool Arena::loadFromFile(const std::string &filePath)
         return false;
     }
 
-    std::unique_ptr<TileSet> tileSet{nullptr};
+    std::vector<TileSet> tileSets;
     for (const tinyxml2::XMLElement *cNode = rootNode->FirstChildElement(); cNode != nullptr;
          cNode = cNode->NextSiblingElement())
     {
         SL_LOG_DEBUG(std::format("Processing node {}", cNode->Name()));
         if (cNode->Name() == std::string("tileset"))
         {
-            if (tileSet != nullptr)
-            {
-                SL_LOG_WARNING("Only 1 tileset is currently supported, found multiple. Using first one");
-                continue;
-            }
+            TileSet tileSet;
 
             SL_LOG_DEBUG(std::format("Loading tile set {}", cNode->Attribute("name")));
-            tileSet = std::make_unique<TileSet>();
 
             const char *nm;
             if (cNode->QueryStringAttribute("name", &nm) != tinyxml2::XML_SUCCESS)
@@ -109,37 +104,37 @@ bool Arena::loadFromFile(const std::string &filePath)
                 SL_LOG_ERROR("Failed to load name of tile set, defaulting to empty string");
                 nm = "";
             }
-            tileSet->name = nm;
+            tileSet.name = nm;
 
-            if (cNode->QueryIntAttribute("firstgid", &tileSet->firstGid) != tinyxml2::XML_SUCCESS)
+            if (cNode->QueryIntAttribute("firstgid", &tileSet.firstGid) != tinyxml2::XML_SUCCESS)
             {
-                SL_LOG_FATAL(std::format("Failed to load firstgid of tile set {}", tileSet->name));
+                SL_LOG_FATAL(std::format("Failed to load firstgid of tile set {}", tileSet.name));
                 return false;
             }
-            if (cNode->QueryIntAttribute("tilewidth", &tileSet->tileWidth) != tinyxml2::XML_SUCCESS)
+            if (cNode->QueryIntAttribute("tilewidth", &tileSet.tileWidth) != tinyxml2::XML_SUCCESS)
             {
-                SL_LOG_ERROR(std::format("Failed to load tilewidth of tile set {}, defaulting to 64", tileSet->name));
-                tileSet->tileWidth = 64;
+                SL_LOG_ERROR(std::format("Failed to load tilewidth of tile set {}, defaulting to 64", tileSet.name));
+                tileSet.tileWidth = 64;
             }
-            if (cNode->QueryIntAttribute("tileheight", &tileSet->tileHeight) != tinyxml2::XML_SUCCESS)
+            if (cNode->QueryIntAttribute("tileheight", &tileSet.tileHeight) != tinyxml2::XML_SUCCESS)
             {
-                SL_LOG_ERROR(std::format("Failed to load tileheight of tile set {}, defaulting to 64", tileSet->name));
-                tileSet->tileHeight = 64;
+                SL_LOG_ERROR(std::format("Failed to load tileheight of tile set {}, defaulting to 64", tileSet.name));
+                tileSet.tileHeight = 64;
             }
-            if (cNode->QueryIntAttribute("tilecount", &tileSet->tileCount) != tinyxml2::XML_SUCCESS)
-            {
-                SL_LOG_WARNING("Tilesets with only a single frame are not supported");
-                tileSet->tileCount = 0;
-            }
-            if (cNode->QueryIntAttribute("columns", &tileSet->columnCount) != tinyxml2::XML_SUCCESS)
+            if (cNode->QueryIntAttribute("tilecount", &tileSet.tileCount) != tinyxml2::XML_SUCCESS)
             {
                 SL_LOG_WARNING("Tilesets with only a single frame are not supported");
-                tileSet->columnCount = 0;
+                tileSet.tileCount = 0;
             }
-            if (cNode->QueryIntAttribute("padding", &tileSet->padding) != tinyxml2::XML_SUCCESS)
+            if (cNode->QueryIntAttribute("columns", &tileSet.columnCount) != tinyxml2::XML_SUCCESS)
+            {
+                SL_LOG_WARNING("Tilesets with only a single frame are not supported");
+                tileSet.columnCount = 0;
+            }
+            if (cNode->QueryIntAttribute("padding", &tileSet.padding) != tinyxml2::XML_SUCCESS)
             {
                 // Ignore
-                tileSet->padding = 0;
+                tileSet.padding = 0;
             }
 
             for (const tinyxml2::XMLElement *tileNode = cNode->FirstChildElement(); tileNode != nullptr;
@@ -147,18 +142,20 @@ bool Arena::loadFromFile(const std::string &filePath)
             {
                 if (tileNode->Name() == std::string("image"))
                 {
-                    tileSet->tiles.push_back(Tile(
+                    tileSet.tiles.push_back(Tile(
                             sf::Vector2i(tileNode->IntAttribute("width", 0), tileNode->IntAttribute("height", 0))));
                     const char *src;
                     if (tileNode->QueryAttribute("source", &src) != tinyxml2::XML_SUCCESS)
                     {
                         SL_LOG_ERROR(std::format("Failed to load source of tile set for image in tile set {}",
-                                                 tileSet->name));
+                                                 tileSet.name));
                         src = "";
                     }
-                    tileSet->tiles.back().texture = src;
+                    tileSet.tiles.back().texture = src;
                 }
             }
+
+            tileSets.push_back(std::move(tileSet));
         }
 
         if (cNode->Name() == std::string("layer"))
@@ -185,7 +182,19 @@ bool Arena::loadFromFile(const std::string &filePath)
                 return false;
             }
 
-            if (!parseLayer(data->GetText(), {tileSet->tileWidth, tileSet->tileHeight}))
+            sf::Vector2i tileSize{0, 0};
+            for (const auto &ts: tileSets)
+            {
+                if (ts.tileWidth > tileSize.x)
+                {
+                    tileSize.x = ts.tileWidth;
+                }
+                if (ts.tileHeight > tileSize.y)
+                {
+                    tileSize.y = ts.tileHeight;
+                }
+            }
+            if (!parseLayer(data->GetText(), tileSize))
             {
                 SL_LOG_FATAL(std::format("Failed to parse layer {}", cNode->Attribute("name")));
                 return false;
@@ -193,36 +202,39 @@ bool Arena::loadFromFile(const std::string &filePath)
         }
     }
 
-    if (!tileSet)
+    if (tileSets.empty())
     {
         SL_LOG_FATAL("Failed to load any tile sets");
         return false;
     }
     SL_LOG_DEBUG(std::format("Loaded {}", filePath));
 
-    int i = 0;
     std::string folder = getFileFolder(filePath);
-    for (auto iter = tileSet->tiles.begin(); iter != tileSet->tiles.end(); ++i, ++iter)
+    for (const auto &tileSet: tileSets)
     {
-        auto texture = std::make_shared<sf::Texture>();
-        if (!texture->loadFromFile(folder + OS_SEP + iter->texture))
+        int i = 0;
+        for (auto iter = tileSet.tiles.begin(); iter != tileSet.tiles.end(); ++i, ++iter)
         {
-            SL_LOG_FATAL(std::format("Failed to load texture {}", folder + OS_SEP + iter->texture));
-            return false;
-        }
+            auto texture = std::make_shared<sf::Texture>();
+            if (!texture->loadFromFile(folder + OS_SEP + iter->texture))
+            {
+                SL_LOG_FATAL(std::format("Failed to load texture {}", folder + OS_SEP + iter->texture));
+                return false;
+            }
 
-        m_textures[i + tileSet->firstGid] = texture;
+            m_textures[i + tileSet.firstGid] = texture;
+        }
     }
 
     SL_LOG_DEBUG("Creating world");
-    createWorld(*tileSet);
+    createWorld(tileSets);
 
     SL_LOG_DEBUG("Created arena");
 
     return true;
 }
 
-void Arena::createWorld(const TileSet &set)
+void Arena::createWorld(const std::vector<TileSet> &set)
 {
     m_viewportSize.x = static_cast<float>(m_size.x * m_tileSize.x);
     m_viewportSize.y = static_cast<float>(m_size.y * m_tileSize.y);
@@ -235,15 +247,12 @@ void Arena::createWorld(const TileSet &set)
     }
     m_objects.reserve(j);
 
-    const int id = set.firstGid;
-    if (!m_textures.contains(id))
+    if (set.empty())
     {
-        SL_LOG_FATAL("Loaded tile set contains a valid image");
+        SL_LOG_FATAL("Failed to load any tile sets");
         return;
     }
 
-    sf::Vector2i frameCount(set.columnCount, std::ceil(set.tileCount / set.columnCount));
-    SL_LOGF_DEBUG("Frame count for {} is {}x{}", set.name, frameCount.x, frameCount.y);
     for (int r = m_size.y - 1; r > 0; --r)
     {
         for (int c = 0; c < m_size.x; ++c)
@@ -260,15 +269,48 @@ void Arena::createWorld(const TileSet &set)
             value &= ~(FLIPPED_HORIZONTALLY_FLAG | FLIPPED_VERTICALLY_FLAG | FLIPPED_DIAGONALLY_FLAG |
                        ROTATED_HEXAGONAL_120_FLAG);
 
+            const TileSet *ts = nullptr;
+            for (auto iter = set.begin(); iter != set.end(); ++iter)
+            {
+                if (iter + 1 == set.end() or value > iter->firstGid and value < (iter + 1)->firstGid)
+                {
+                    ts = iter.base();
+                    break;
+                }
+            }
+            if (ts == nullptr)
+            {
+                SL_LOGF_FATAL("Failed to find tile set for value {}", value);
+                return;
+            }
+
+            sf::Vector2i frameCount(ts->columnCount, std::ceil(ts->tileCount / ts->columnCount));
+            // SL_LOGF_DEBUG("Frame count for {} is {}x{}", ts->name, frameCount.x, frameCount.y);
+            const int id = ts->firstGid;
+            if (!m_textures.contains(id))
+            {
+                SL_LOG_FATAL("Loaded tile set does not contain a valid image");
+                return;
+            }
+
             // SL_LOG_DEBUG(std::format("Creating item at location x: {}, y: {} with frame id: {}", c * m_tileSize.x,
             //                          r * m_tileSize.y, value));
             m_objects.emplace_back(
                     m_textures[id],
                     sf::Vector2f(static_cast<float>(c * m_tileSize.x), static_cast<float>(r * m_tileSize.y)),
-                    sf::Vector2f(m_tileSize), frameCount, sf::Vector2i(set.padding, set.padding), value - 1);
+                    sf::Vector2f(m_tileSize), frameCount, sf::Vector2i(ts->padding, ts->padding), value - ts->firstGid);
             m_objects.back().setFlippedHorizontally(flippedHorizontally);
             m_objects.back().setFlippedVertically(flippedVertically);
             m_objects.back().setFlippedDiagonally(flippedDiagonally);
+
+            if (ts->name == "Spikes")
+            {
+                m_objects.back().setType(ArenaItemType::Spike);
+            }
+            else if (ts->name == "Default")
+            {
+                m_objects.back().setType(ArenaItemType::Default);
+            }
         }
     }
 

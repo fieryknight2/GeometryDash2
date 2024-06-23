@@ -15,9 +15,8 @@
 
 enum class ArenaItemType
 {
-    None,
+    Default,
     Spike,
-    Explosion,
 };
 
 class ArenaItem
@@ -71,7 +70,7 @@ private:
 
     int m_frame{};
 
-    ArenaItemType m_type{ArenaItemType::None};
+    ArenaItemType m_type{ArenaItemType::Default};
 
     std::function<void()> m_onCollision;
     std::function<void()> m_onUpdate;

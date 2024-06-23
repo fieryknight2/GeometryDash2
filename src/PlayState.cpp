@@ -98,6 +98,13 @@ void PlayState::update()
             m_topState->create();
         }
     }
+    // if (m_settingsButton.wasPressed())
+    // {
+    //     SL_LOG_DEBUG("Opening settings");
+    //     m_isPaused = true;
+    //     m_topState = std::make_unique<SettingsState>();
+    //     m_topState->create();
+    // }
 
     if (m_isPaused == false)
     {
@@ -117,15 +124,14 @@ void PlayState::update()
             // Temp
             GeometryDash::getInstance().changeState(std::make_unique<PlayState>());
         }
-    }
 
-    // TODO: Smooth camera movement
-    const float lerpSpeed =
-            std::min(1.0f, m_cameraSmoothSpeed * GeometryDash::getInstance().getDeltaTime().asSeconds());
-    // m_cameraPos.x = std::lerp(m_cameraPos.x, m_player.getPosition().x - m_cameraOffset.x, lerpSpeed);
-    // m_cameraPos.y = std::lerp(m_cameraPos.y, m_player.getPosition().y - m_cameraOffset.y, lerpSpeed);
-    // m_cameraPos.y = m_player.getPosition().y - m_cameraOffset.y;
-    m_cameraPos.y = std::lerp(m_cameraPos.y, -m_player.getPosition().y + m_cameraOffset.y, lerpSpeed);
+        const float lerpSpeed =
+                std::min(1.0f, m_cameraSmoothSpeed * GeometryDash::getInstance().getDeltaTime().asSeconds());
+        // m_cameraPos.x = std::lerp(m_cameraPos.x, m_player.getPosition().x - m_cameraOffset.x, lerpSpeed);
+        // m_cameraPos.y = std::lerp(m_cameraPos.y, m_player.getPosition().y - m_cameraOffset.y, lerpSpeed);
+        // m_cameraPos.y = m_player.getPosition().y - m_cameraOffset.y;
+        m_cameraPos.y = std::lerp(m_cameraPos.y, -m_player.getPosition().y + m_cameraOffset.y, lerpSpeed);
+    }
 }
 
 void PlayState::handleEvent(const sf::Event &event)

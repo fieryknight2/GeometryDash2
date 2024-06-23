@@ -79,5 +79,5 @@ private:
         std::vector<Tile> tiles;
     };
 
-    void createWorld(const TileSet &set);
+    void createWorld(const std::vector<TileSet> &set);
 };

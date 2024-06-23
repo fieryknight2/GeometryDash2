@@ -7,6 +7,12 @@
 #include "GeometryDash.h"
 #include "simplelogger.hpp"
 
+bool inside(const sf::Vector2f &point, const sf::FloatRect &rect)
+{
+    return point.x >= rect.left and point.x <= rect.left + rect.width and point.y >= rect.top and
+           point.y <= rect.top + rect.height;
+}
+
 uint64_t ArenaItem::s_idCounter = 0;
 
 ArenaItem::ArenaItem(const std::shared_ptr<sf::Texture> &texture, const sf::Vector2f &position,
@@ -33,10 +39,80 @@ void ArenaItem::setAnimation(const int minFrame, const int maxFrame, const int f
 bool ArenaItem::collides(const sf::FloatRect &shape)
 {
     m_sprite.setPosition(m_position - m_relativePosition);
-    const bool collides = m_sprite.getGlobalBounds().intersects(shape);
-    if (collides and m_onCollision != nullptr)
+    bool collides = false;
+
+    const sf::FloatRect m_shape = m_sprite.getGlobalBounds();
+    if (m_type == ArenaItemType::Default)
     {
-        m_onCollision();
+        collides = m_shape.intersects(shape);
+        if (collides and m_onCollision != nullptr)
+        {
+            m_onCollision();
+        }
+    }
+    else if (m_type == ArenaItemType::Spike)
+    {
+        // Quick optimization
+        if (!m_shape.intersects(shape))
+        {
+            return false;
+        }
+
+        // Middle of the enemy is inside the shape, collision is guaranteed
+        if (inside(shape.getPosition() + sf::Vector2f{shape.getSize().x / 2, shape.getSize().y / 2}, m_shape))
+        {
+            collides = true;
+        }
+        else if (inside({shape.getPosition().x + shape.getSize().x, shape.getPosition().y + shape.getSize().y},
+                        shape) and
+                 !inside({shape.getPosition().x, shape.getPosition().y + shape.getSize().y}, shape))
+        {
+            // right corner inside the box
+            // Check which side of the box the corner is in
+            if (shape.getPosition().x < m_shape.getPosition().x + (m_shape.getSize().x / 2))
+            {
+                // Check the position of the corner via the slope?
+                if (const sf::Vector2f slope =
+                            sf::Vector2f(shape.getPosition().x + shape.getPosition().x,
+                                         shape.getPosition().y + shape.getSize().y) -
+                            sf::Vector2f(m_shape.getPosition().x + m_shape.getPosition().x, m_shape.getPosition().y);
+                    slope.y / slope.x > -1.79) // cot 22.5
+                {
+                    collides = false;
+                }
+                else
+                {
+                    collides = true;
+                }
+            }
+            else
+            {
+                collides = true;
+            }
+        }
+        else if (inside({shape.getPosition().x, shape.getPosition().y + shape.getSize().y}, shape) and
+                 !inside({shape.getPosition().x + shape.getSize().x, shape.getPosition().y + shape.getSize().y}, shape))
+        {
+            // left corner inside the box
+            if (shape.getPosition().x > m_shape.getPosition().x + (m_shape.getSize().x / 2))
+            {
+                if (const sf::Vector2f slope =
+                            sf::Vector2f(shape.getPosition().x, shape.getPosition().y + shape.getSize().y) -
+                            sf::Vector2f(m_shape.getPosition().x, m_shape.getPosition().y);
+                    slope.y / slope.x > 0.41) // cot 67.5
+                {
+                    collides = false;
+                }
+                else
+                {
+                    collides = true;
+                }
+            }
+            else
+            {
+                collides = true;
+            }
+        }
     }
 
     return collides;

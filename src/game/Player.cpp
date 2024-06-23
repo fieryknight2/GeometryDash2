@@ -52,6 +52,12 @@ Player::Player(const sf::Texture &texture, const sf::Vector2f &position, const s
 
 void Player::update(Arena &arena)
 {
+    if (m_isDead)
+    {
+
+        return;
+    }
+
     m_animator.update();
 
     if (!m_onGround)
@@ -71,6 +77,13 @@ void Player::update(Arena &arena)
     m_sprite.setPosition(m_position);
     if (const ArenaItem *collide = arena.collidePlayer(m_sprite.getGlobalBounds()); collide != nullptr)
     {
+        if (collide->getType() == ArenaItemType::Spike)
+        {
+            // SL_LOGF_DEBUG("Player collided with a spike: {}", collide->getId());
+            m_isDead = true;
+            return; // No further processing to be done
+        }
+
         sf::Vector2f posC = m_sprite.getPosition();
         posC.y = (collide->getPosition() - collide->getRelativePosition()).y - m_size.y;
 
@@ -98,6 +111,13 @@ void Player::update(Arena &arena)
         m_sprite.setPosition(m_position);
         if (collide = arena.collidePlayer(m_sprite.getGlobalBounds()); collide != nullptr)
         {
+            if (collide->getType() == ArenaItemType::Spike)
+            {
+                // SL_LOGF_DEBUG("Player collided with a spike: {}", collide->getId());
+                m_isDead = true;
+                return; // No further processing to be done
+            }
+
             // Hit the floor
             sf::Vector2f posC = m_sprite.getPosition();
             posC.y = (collide->getPosition() - collide->getRelativePosition()).y - m_size.y;
