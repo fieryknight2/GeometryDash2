@@ -51,6 +51,7 @@ void PlayState::create()
 
     m_arena = AssetManager::getInstance().getLevel("level-1");
 
+    m_arena.resetPos();
     m_arena.setViewportSize(sf::Vector2f(GeometryDash::getInstance().getWindow().getWindow().getSize()));
     m_arena.setScrollSpeed(sf::Vector2f(250, 0));
 

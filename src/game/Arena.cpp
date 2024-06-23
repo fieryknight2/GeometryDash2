@@ -228,9 +228,9 @@ void Arena::createWorld(const TileSet &set)
     m_viewportSize.y = static_cast<float>(m_size.y * m_tileSize.y);
 
     int j = 0;
-    for (int i = 0; i < m_size.x * m_size.y; ++i)
+    for (const auto &pos: m_map)
     {
-        if (m_map[i] != 0)
+        if (pos != 0)
             j++;
     }
     m_objects.reserve(j);
@@ -275,6 +275,13 @@ void Arena::createWorld(const TileSet &set)
     m_objects.shrink_to_fit();
 
     SL_LOGF_DEBUG("Loaded {} objects", m_objects.size());
+
+    resetPos();
+}
+
+void Arena::resetPos()
+{
+    m_position.x = 0;
     SL_LOG_DEBUG("Finding starting Y position");
     for (int i = 0; i < m_size.x * m_size.y; i += m_size.x)
     {
@@ -291,11 +298,10 @@ void Arena::createWorld(const TileSet &set)
 
 bool Arena::parseLayer(const std::string &layer, sf::Vector2i tileSize)
 {
-    delete[] m_map;
-    m_map = new size_t[m_size.x * m_size.y];
-    for (int i = 0; i < m_size.x * m_size.y; ++i)
+    m_map.resize(m_size.x * m_size.y);
+    for (auto &pos: m_map)
     {
-        m_map[i] = 0;
+        pos = 0;
     }
 
     int pos = 0;

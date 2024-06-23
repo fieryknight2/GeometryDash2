@@ -17,7 +17,7 @@ class Arena
 {
 public:
     Arena() = default;
-    ~Arena() { delete[] m_map; }
+    ~Arena() = default;
 
     [[nodiscard]] bool loadFromFile(const std::string &filePath);
 
@@ -38,6 +38,8 @@ public:
 
     [[nodiscard]] ArenaItem *collidePlayer(const sf::FloatRect &shape);
 
+    void resetPos();
+
 private:
     sf::Vector2i m_size;
     sf::Vector2f m_viewportSize;
@@ -48,7 +50,7 @@ private:
     std::vector<ArenaItem> m_objects;
 
     // List of tiles in the arena
-    size_t *m_map = nullptr;
+    std::vector<size_t> m_map;
     sf::Vector2i m_tileSize;
 
     // ID to Image

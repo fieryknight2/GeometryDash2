@@ -1,6 +1,7 @@
 /* Created by Matthew Brown on 6/19/2024 */
 
 #include "Window.h"
+#include "AssetManager.h"
 
 void Window::create(const WindowSettings &settings)
 {
@@ -8,7 +9,11 @@ void Window::create(const WindowSettings &settings)
     m_window.create(m_mode, settings.title, settings.flags);
 }
 
-void Window::close() { m_window.close(); }
+void Window::close()
+{
+    AssetManager::getInstance().clean();
+    m_window.close();
+}
 
 void Window::clear() { m_window.clear(m_clearColor); }
 

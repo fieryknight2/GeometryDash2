@@ -36,6 +36,8 @@ public:
 
     [[nodiscard]] Arena &getLevel(const std::string &id);
 
+    void clean();
+
 private:
     static AssetManager S_instance;
 

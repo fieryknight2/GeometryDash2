@@ -100,3 +100,10 @@ Arena &AssetManager::getLevel(const std::string &id)
 
     return m_arenas[id];
 }
+
+void AssetManager::clean()
+{
+    m_textures.clear();
+    m_fonts.clear();
+    m_arenas.clear();
+}
