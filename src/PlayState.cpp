@@ -126,10 +126,7 @@ void PlayState::update()
 
 void PlayState::handleEvent(const sf::Event &event)
 {
-    if (event.type == sf::Event::Closed)
-    {
-    }
-    else if (event.type == sf::Event::KeyPressed)
+    if (event.type == sf::Event::KeyPressed)
     {
         switch (event.key.code)
         {
