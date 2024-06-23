@@ -38,6 +38,10 @@ private:
     sf::Texture m_pauseTexture;
     sf::Texture m_playerTexture;
 
+    sf::Vector2f m_cameraPos;
+    sf::Vector2f m_cameraOffset;
+    float m_cameraSmoothSpeed = 1;
+
     Arena m_arena;
     Player m_player{};
 

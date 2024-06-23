@@ -11,11 +11,11 @@
 
 #include "game/Arena.h"
 
-constexpr float GRAVITY = 3800;
-constexpr float JUMP_SPEED = 150;
-constexpr float JUMP_VELOCITY = -600;
+constexpr float GRAVITY = 6800;
+constexpr float JUMP_SPEED = 200;
+constexpr float JUMP_VELOCITY = -500;
 constexpr float MAX_VELOCITY = 800;
-constexpr float MAX_ACCELERATION = 1200;
+constexpr float MAX_ACCELERATION = 1500;
 constexpr float DEATH_THRESHOLD = 5;
 constexpr float ROTATION_SPEED = 0.001;
 constexpr float JUMP_THRESHOLD = 0.005;
@@ -61,7 +61,7 @@ public:
     ~Player() = default;
 
     void update(Arena &arena);
-    void render();
+    void render(const sf::Vector2f &cameraPos);
 
     [[nodiscard]] sf::Vector2f getPosition() const { return m_position; }
     [[nodiscard]] sf::Vector2f getSize() const { return m_size; }

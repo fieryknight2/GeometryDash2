@@ -59,6 +59,10 @@ void PlayState::create()
                       PlayerAnimator(sf::Vector2f(64, 64), sf::Vector2i(), 0, 0, 10, sf::Vector2i(0, 0)));
 
     GeometryDash::getInstance().getWindow().setClearColor(sf::Color::White);
+
+    m_cameraPos = sf::Vector2f(0, 0);
+    m_cameraOffset =
+            sf::Vector2f(0, static_cast<float>(GeometryDash::getInstance().getWindow().getWindow().getSize().y) / 2);
 }
 
 void PlayState::update()
@@ -114,6 +118,14 @@ void PlayState::update()
             GeometryDash::getInstance().changeState(std::make_unique<PlayState>());
         }
     }
+
+    // TODO: Smooth camera movement
+    const float lerpSpeed =
+            std::min(1.0f, m_cameraSmoothSpeed * GeometryDash::getInstance().getDeltaTime().asSeconds());
+    // m_cameraPos.x = std::lerp(m_cameraPos.x, m_player.getPosition().x - m_cameraOffset.x, lerpSpeed);
+    // m_cameraPos.y = std::lerp(m_cameraPos.y, m_player.getPosition().y - m_cameraOffset.y, lerpSpeed);
+    // m_cameraPos.y = m_player.getPosition().y - m_cameraOffset.y;
+    m_cameraPos.y = std::lerp(m_cameraPos.y, -m_player.getPosition().y + m_cameraOffset.y, lerpSpeed);
 }
 
 void PlayState::handleEvent(const sf::Event &event)
@@ -149,8 +161,9 @@ void PlayState::render()
     // Draw FPS counter on top to preserve z index
     GeometryDash::getInstance().getWindow().getWindow().draw(m_fpsCounter);
 
-    m_arena.render();
-    m_player.render();
+    m_arena.render(m_cameraPos);
+    // m_player.render(m_cameraPos);
+    m_player.render(m_cameraPos);
 
     m_pauseButton.render();
     m_settingsButton.render();

@@ -22,7 +22,7 @@ public:
     [[nodiscard]] bool loadFromFile(const std::string &filePath);
 
     void update();
-    void render();
+    void render(const sf::Vector2f &cameraPos);
 
     [[nodiscard]] sf::Vector2i getTileSize() const { return m_tileSize; }
 

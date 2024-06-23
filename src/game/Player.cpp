@@ -134,13 +134,14 @@ void Player::update(Arena &arena)
     }
 }
 
-void Player::render()
+void Player::render(const sf::Vector2f &cameraPos)
 {
-    m_sprite.setPosition(m_position);
+    m_sprite.setPosition(m_position + cameraPos);
     m_sprite.setTextureRect(m_animator.render());
     m_sprite.setScale(m_size.x / static_cast<float>(m_animator.getSize().x),
                       m_size.y / static_cast<float>(m_animator.getSize().y));
     GeometryDash::getInstance().getWindow().getWindow().draw(m_sprite);
+    m_sprite.setPosition(m_position);
 }
 
 void Player::handleEvent(const sf::Event &event)

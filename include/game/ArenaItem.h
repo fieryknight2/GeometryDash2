@@ -30,7 +30,7 @@ public:
     void setAnimation(int minFrame, int maxFrame, int frameRate);
 
     void update();
-    void render();
+    void render(const sf::Vector2f &cameraPos);
 
     void setRelativePosition(const sf::Vector2f &position) { m_relativePosition = position; }
     sf::Vector2f getRelativePosition() const { return m_relativePosition; }

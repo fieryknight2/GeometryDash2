@@ -58,11 +58,11 @@ void ArenaItem::update()
     }
 }
 
-void ArenaItem::render()
+void ArenaItem::render(const sf::Vector2f &cameraPos)
 {
     // SL_LOG_DEBUG(std::format("Rendering item at location ({}, {})", m_position.x - m_relativePosition.x,
     //                          m_position.y - m_relativePosition.y));
-    m_sprite.setPosition(m_position - m_relativePosition);
+    m_sprite.setPosition(m_position - m_relativePosition + cameraPos);
     // m_sprite.setOrigin(sf::Vector2f(m_size.x / 2, m_size.y / 2));
     m_sprite.setTexture(*m_texture);
 

@@ -14,7 +14,7 @@ public:
     virtual ~GameObject() = default;
 
     virtual void update() = 0;
-    virtual void render() = 0;
+    virtual void render(sf::Vector2f cameraPos) = 0;
 
     [[nodiscard]] int getZIndex() const { return m_zIndex; }
     void setZIndex(const int zIndex) { m_zIndex = zIndex; }

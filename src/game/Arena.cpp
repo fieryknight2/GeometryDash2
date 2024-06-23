@@ -390,31 +390,31 @@ void Arena::update()
     {
         arenaItem.setRelativePosition(m_position);
         // Only update items that are in the viewport
-        if (arenaItem.getPosition().x > m_position.x + m_viewportSize.x + static_cast<float>(m_tileSize.x * 2) or
-            arenaItem.getPosition().x < m_position.x - m_viewportSize.x - static_cast<float>(m_tileSize.x * 2))
-            continue;
-        if (arenaItem.getPosition().y > m_position.y + m_viewportSize.y + static_cast<float>(m_tileSize.y * 2) or
-            arenaItem.getPosition().y < m_position.y - m_viewportSize.y - static_cast<float>(m_tileSize.y * 2))
-            continue;
+        // if (arenaItem.getPosition().x > m_position.x + m_viewportSize.x + static_cast<float>(m_tileSize.x * 2) or
+        //     arenaItem.getPosition().x < m_position.x - m_viewportSize.x - static_cast<float>(m_tileSize.x * 2))
+        //     continue;
+        // if (arenaItem.getPosition().y > m_position.y + m_viewportSize.y + static_cast<float>(m_tileSize.y * 2) or
+        //     arenaItem.getPosition().y < m_position.y - m_viewportSize.y - static_cast<float>(m_tileSize.y * 2))
+        //     continue;
 
         arenaItem.update();
     }
 }
 
-void Arena::render()
+void Arena::render(const sf::Vector2f &cameraPos)
 {
     for (auto &arenaItem: m_objects)
     {
         // Only render items that are in the viewport
-        if (arenaItem.getPosition().x > m_position.x + m_viewportSize.x + static_cast<float>(m_tileSize.x * 2) or
-            arenaItem.getPosition().x < m_position.x - m_viewportSize.x - static_cast<float>(m_tileSize.x * 2))
-            continue;
-        if (arenaItem.getPosition().y > m_position.y + m_viewportSize.y + static_cast<float>(m_tileSize.y * 2) or
-            arenaItem.getPosition().y < m_position.y - m_viewportSize.y - static_cast<float>(m_tileSize.y * 2))
-            continue;
+        // if (arenaItem.getPosition().x > m_position.x + m_viewportSize.x + static_cast<float>(m_tileSize.x * 2) or
+        //     arenaItem.getPosition().x < m_position.x - m_viewportSize.x - static_cast<float>(m_tileSize.x * 2))
+        //     continue;
+        // if (arenaItem.getPosition().y > m_position.y + m_viewportSize.y + static_cast<float>(m_tileSize.y * 2) or
+        //     arenaItem.getPosition().y < m_position.y - m_viewportSize.y - static_cast<float>(m_tileSize.y * 2))
+        //     continue;
 
         arenaItem.setRelativePosition(m_position);
-        arenaItem.render();
+        arenaItem.render(cameraPos);
     }
 }
 
