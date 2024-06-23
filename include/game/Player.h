@@ -7,37 +7,47 @@
 
 #include "SFML/Graphics/Sprite.hpp"
 #include "SFML/Graphics/Texture.hpp"
+#include "SFML/Window/Event.hpp"
 
 #include "game/Arena.h"
+
+constexpr float GRAVITY = 1200;
+constexpr float JUMP_SPEED = -100;
+constexpr float JUMP_VELOCITY = -200;
+constexpr float MAX_VELOCITY = 600;
+constexpr float MAX_ACCELERATION = 600;
+constexpr float DEATH_THRESHOLD = -100;
+
 
 class PlayerAnimator
 {
 public:
     PlayerAnimator(const sf::Vector2f &sz, const sf::Vector2i frameCount, const int minFm, const int maxFm,
                    const int frameRate, const sf::Vector2i &pd) :
-        size(sz), texFrameCount(frameCount), minFrame(minFm), maxFrame(maxFm), frameRate(frameRate), padding(pd)
+        m_size(sz), m_texFrameCount(frameCount), m_minFrame(minFm), m_maxFrame(maxFm), m_frameRate(frameRate),
+        m_padding(pd)
     {
     }
     PlayerAnimator() = default;
     void update();
     [[nodiscard]] sf::IntRect &render();
 
-    [[nodiscard]] sf::Vector2i getSize() const { return size; }
-    [[nodiscard]] int getMinFrame() const { return minFrame; }
-    [[nodiscard]] int getMaxFrame() const { return maxFrame; }
-    [[nodiscard]] int getFrameRate() const { return frameRate; }
+    [[nodiscard]] sf::Vector2i getSize() const { return m_size; }
+    [[nodiscard]] int getMinFrame() const { return m_minFrame; }
+    [[nodiscard]] int getMaxFrame() const { return m_maxFrame; }
+    [[nodiscard]] int getFrameRate() const { return m_frameRate; }
 
 private:
-    sf::IntRect rect{};
-    double dtCounter = 0;
+    sf::IntRect m_rect{};
+    double m_dtCounter = 0;
 
-    sf::Vector2i size{};
-    sf::Vector2i texFrameCount{};
-    int minFrame = 0;
-    int maxFrame = 0;
-    int frameRate = 0;
-    int currentFrame = 0;
-    sf::Vector2i padding{};
+    sf::Vector2i m_size{};
+    sf::Vector2i m_texFrameCount{};
+    int m_minFrame = 0;
+    int m_maxFrame = 0;
+    int m_frameRate = 0;
+    int m_currentFrame = 0;
+    sf::Vector2i m_padding{};
 };
 
 class Player
@@ -60,14 +70,20 @@ public:
 
     [[nodiscard]] bool isDead() const { return m_isDead; }
 
+    void handleEvent(const sf::Event &event);
+
 private:
     bool m_isDead = false;
+    bool m_onGround = false;
 
     sf::Sprite m_sprite{};
     sf::Texture m_texture{};
 
     sf::Vector2f m_position{0, 0};
     sf::Vector2f m_size{64, 64};
+
+    float m_velocity = 0;
+    float m_acceleration = 0;
 
     PlayerAnimator m_animator;
 };

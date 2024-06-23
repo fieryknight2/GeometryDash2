@@ -139,6 +139,8 @@ void PlayState::handleEvent(const sf::Event &event)
                 break;
         }
     }
+
+    m_player.handleEvent(event);
 }
 
 void PlayState::render()
