@@ -12,6 +12,12 @@ int main(int argc, char *argv[])
 #else
     SIMPLE_LOGGER_LOG_VERSION_INFO();
     SL_LOG_VERSION_INFO("Geometry Dash", "0.0.1");
+
+    SL_LOG_TO_FILE("GeometryDash-debug-recent.log", slog::LogFileMode::OVERWRITE);
+    slog::SimpleLogger::GlobalLogger()->getLogger(2)->setMinLogLevel(slog::LogLevel::DEBUG);
+
+    SL_LOG_TO_FILE("GeometryDash-debug.log", slog::LogFileMode::APPEND);
+    slog::SimpleLogger::GlobalLogger()->getLogger(3)->setMinLogLevel(slog::LogLevel::DEBUG);
 #endif // NDEBUG
 
     // Run the game
