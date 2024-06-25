@@ -17,6 +17,7 @@ enum class ArenaItemType
 {
     Default,
     Spike,
+    TinySpike,
 };
 
 class ArenaItem
@@ -86,4 +87,7 @@ private:
     bool m_flippedHorizontally = false;
     bool m_flippedVertically = false;
     bool m_flippedDiagonally = false;
+
+    bool collideTallSpike(const sf::FloatRect &shape) const;
+    bool collideSmallSpike(const sf::FloatRect &shape) const;
 };
