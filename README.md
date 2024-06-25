@@ -1,2 +1,4 @@
 # Geometry Dash 2
-A second version of Geometry Dash, using SFML
+
+A remake of my old Geometry Dash game which was originally written
+using SDL, this version is improved and rewritten using SFML.
