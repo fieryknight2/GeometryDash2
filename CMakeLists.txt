@@ -7,7 +7,7 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(dependencies)
 
-add_executable(GeometryDash2
+set(GEOMETRYDASH2_SOURCES
         # Headers
         include/GeometryDash.h
         include/Window.h
@@ -39,6 +39,10 @@ add_executable(GeometryDash2
         src/MainMenuState.cpp
         src/GeometryDash.cpp
         src/Window.cpp
+)
+
+add_executable(GeometryDash2
+        ${GEOMETRYDASH2_SOURCES}
         src/main.cpp
 )
 
@@ -91,3 +95,29 @@ add_custom_command(TARGET GeometryDash2 POST_BUILD
         ${CMAKE_CURRENT_SOURCE_DIR}/assets
         $<TARGET_FILE_DIR:GeometryDash2>/assets
 )
+
+
+option(DEVTEST "For easily creating/testing features" OFF)
+if (DEVTEST)
+    message(STATUS "Building Devtest")
+    add_executable(Test
+            src/test.cpp
+            ${GEOMETRYDASH2_SOURCES}
+    )
+
+    target_link_libraries(Test PRIVATE
+            sfml-graphics
+            sfml-window
+            sfml-system
+            tinyxml2::tinyxml2
+            SimpleLogger
+    )
+
+    target_include_directories(Test PRIVATE
+            include
+            ${SIMPLE_LOGGER_INCLUDE_DIR}
+            ${TINYXML2_INCLUDE_DIR}
+    )
+
+    target_compile_definitions(Test PRIVATE DEVTEST)
+endif ()
