@@ -14,12 +14,11 @@
 class PlayState final : public State
 {
 public:
+    PlayState();
     std::string getName() override { return "Play"; }
 
-    void create() override;
     void update() override;
     void render() override;
-    void destroy() override;
     void handleEvent(const sf::Event &event) override;
 
     Arena &getArena() { return m_arena; }
@@ -30,7 +29,7 @@ private:
     sf::Font m_defaultFont;
 
     bool m_isPaused = false;
-    std::unique_ptr<State> m_topState = nullptr;
+    std::shared_ptr<State> m_topState = nullptr;
 
     IconButton m_pauseButton;
     IconButton m_settingsButton;
@@ -47,4 +46,7 @@ private:
 
     double m_updateCount = 1.0;
     int m_avgFPS = 0;
+
+    void openSettings();
+    void openPause();
 };

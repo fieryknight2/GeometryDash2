@@ -11,12 +11,11 @@
 class PauseState final : public State
 {
 public:
+    PauseState();
     std::string getName() override { return "Pause"; }
 
-    void create() override;
     void update() override {}
     void render() override;
-    void destroy() override {}
 
 private:
     sf::Font m_defaultFont;

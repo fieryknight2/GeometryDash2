@@ -5,7 +5,7 @@
 
 #include <format>
 
-void PauseState::create()
+PauseState::PauseState()
 {
     SL_LOG_DEBUG("Loading Mangabey font");
     if (!m_defaultFont.loadFromFile("assets/fonts/mangabey-regular.otf"))

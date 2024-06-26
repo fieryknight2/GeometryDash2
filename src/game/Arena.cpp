@@ -1,6 +1,7 @@
 /* Created by Matthew Brown on 6/19/2024 */
 #include "game/Arena.h"
 
+#include <algorithm>
 #include <cmath>
 #include <format>
 #include <iostream>
@@ -227,6 +228,7 @@ bool Arena::loadFromFile(const std::string &filePath)
     }
 
     SL_LOG_DEBUG("Creating world");
+
     createWorld(tileSets);
 
     SL_LOG_DEBUG("Created arena");
@@ -253,6 +255,8 @@ void Arena::createWorld(const std::vector<TileSet> &set)
         return;
     }
 
+    std::vector<TileSet> nset = set;
+    std::ranges::sort(nset, [](const TileSet &a, const TileSet &b) { return a.firstGid < b.firstGid; });
     for (int r = m_size.y - 1; r > 0; --r)
     {
         for (int c = 0; c < m_size.x; ++c)
@@ -270,9 +274,9 @@ void Arena::createWorld(const std::vector<TileSet> &set)
                        ROTATED_HEXAGONAL_120_FLAG);
 
             const TileSet *ts = nullptr;
-            for (auto iter = set.begin(); iter != set.end(); ++iter)
+            for (auto iter = nset.begin(); iter != nset.end(); ++iter)
             {
-                if (iter + 1 == set.end() or value > iter->firstGid and value < (iter + 1)->firstGid)
+                if (iter + 1 == nset.end() or (value >= iter->firstGid and value < (iter + 1)->firstGid))
                 {
                     ts = iter.base();
                     break;
@@ -306,6 +310,10 @@ void Arena::createWorld(const std::vector<TileSet> &set)
             if (ts->name == "Spikes")
             {
                 m_objects.back().setType(ArenaItemType::Spike);
+            }
+            else if (ts->name == "TinySpikes")
+            {
+                m_objects.back().setType(ArenaItemType::TinySpike);
             }
             else if (ts->name == "Default")
             {

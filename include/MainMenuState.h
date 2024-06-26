@@ -11,12 +11,11 @@
 class MainMenuState final : public State
 {
 public:
+    MainMenuState();
     std::string getName() override { return "MainMenu"; }
 
-    void create() override;
     void update() override;
     void render() override;
-    void destroy() override;
 
 private:
     Button m_startButton;

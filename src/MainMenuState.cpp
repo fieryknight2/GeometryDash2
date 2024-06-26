@@ -10,7 +10,7 @@
 #include "SFML/Graphics/Font.hpp"
 #include "simplelogger.hpp"
 
-void MainMenuState::create()
+MainMenuState::MainMenuState()
 {
     constexpr int buttonWidth = 200;
     constexpr int buttonHeight = 50;
@@ -95,9 +95,4 @@ void MainMenuState::render()
     m_startButton.render();
     m_optionsButton.render();
     m_exitButton.render();
-}
-
-void MainMenuState::destroy()
-{
-    // Destroy the menu
 }

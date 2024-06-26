@@ -69,8 +69,6 @@ private:
     sf::Vector2f m_relativePosition;
     sf::Vector2f m_size;
 
-    int m_frame{};
-
     ArenaItemType m_type{ArenaItemType::Default};
 
     std::function<void()> m_onCollision;

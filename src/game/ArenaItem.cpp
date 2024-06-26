@@ -38,6 +38,8 @@ void ArenaItem::setAnimation(const int minFrame, const int maxFrame, const int f
 
 bool ArenaItem::collideTallSpike(const sf::FloatRect &shape) const
 {
+    return false; // temporarily disabled
+
     const sf::FloatRect m_shape = m_sprite.getGlobalBounds();
     // Quick optimization
     if (!m_shape.intersects(shape))
@@ -98,7 +100,7 @@ bool ArenaItem::collideTallSpike(const sf::FloatRect &shape) const
 bool ArenaItem::collideSmallSpike(const sf::FloatRect &shape) const
 {
     const sf::FloatRect m_shape = m_sprite.getGlobalBounds();
-    return false;
+    return false; // temporarily disabled
 }
 
 bool ArenaItem::collides(const sf::FloatRect &shape)

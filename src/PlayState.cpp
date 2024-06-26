@@ -10,7 +10,7 @@
 
 #include "AssetManager.h"
 
-void PlayState::create()
+PlayState::PlayState()
 {
     ArenaItem::resetIds();
 
@@ -64,6 +64,9 @@ void PlayState::create()
     m_cameraPos = sf::Vector2f(0, 0);
     m_cameraOffset =
             sf::Vector2f(0, static_cast<float>(GeometryDash::getInstance().getWindow().getWindow().getSize().y) / 2);
+
+    m_settingsButton.setClickedCallback([this] { this->openSettings(); });
+    m_pauseButton.setClickedCallback([this] { this->openPause(); });
 }
 
 void PlayState::update()
@@ -84,73 +87,28 @@ void PlayState::update()
     m_pauseButton.update();
     m_settingsButton.update();
 
-    if (m_pauseButton.wasPressed())
-    {
-        SL_LOG_DEBUG("Toggling pause");
-        m_isPaused = !m_isPaused;
-
-        if (m_topState)
-        {
-            m_topState->destroy();
-            m_topState = nullptr;
-        }
-        else
-        {
-            m_topState = std::make_unique<PauseState>();
-            m_topState->create();
-        }
-    }
-
-    if (m_settingsButton.wasPressed())
-    {
-        if (m_topState and m_topState->getName() == "Settings")
-        {
-            return; // do nothing
-        }
-
-        SL_LOG_DEBUG("Opening settings");
-        m_isPaused = true;
-
-        if (m_topState and m_topState->getName() != "Settings")
-        {
-            m_topState->destroy();
-            m_topState = nullptr;
-        }
-        m_topState = std::make_unique<SettingsState>();
-        m_topState->create();
-        return;
-    }
-    if (m_topState and m_topState->getName() == "Settings")
+    if (m_topState and m_topState->getName() == std::string("Settings"))
     {
         m_topState->update();
-        const SettingsState *const temp = dynamic_cast<SettingsState *>(m_topState.get());
-        if (temp->quit())
-        {
-            m_topState->destroy();
-            m_topState = nullptr;
-        }
+        const auto temp = std::dynamic_pointer_cast<SettingsState>(m_topState);
+
         if (temp->continueGame())
         {
-            m_topState->destroy();
             m_topState = nullptr;
             m_isPaused = false;
         }
         if (temp->restartGame())
         {
-            m_topState->destroy();
-            m_topState = nullptr;
-
             GeometryDash::getInstance().changeState(std::make_unique<PlayState>());
         }
         if (temp->toMenu())
         {
-            m_topState->destroy();
-            m_topState = nullptr;
-            m_isPaused = false;
-
             GeometryDash::getInstance().changeState(std::make_unique<MainMenuState>());
         }
-        return;
+    }
+    else if (m_topState)
+    {
+        m_topState->update();
     }
 
     if (m_isPaused == false)
@@ -175,9 +133,40 @@ void PlayState::update()
                 std::min(1.0f, m_cameraSmoothSpeed * GeometryDash::getInstance().getDeltaTime().asSeconds());
         m_cameraPos.y = std::lerp(m_cameraPos.y, -m_player.getPosition().y + m_cameraOffset.y, lerpSpeed);
     }
+}
+
+void PlayState::openSettings()
+{
+    if (m_topState)
+    {
+        m_topState = nullptr;
+        m_isPaused = false;
+        return;
+    }
+
+
+    m_isPaused = true;
+    m_topState = std::make_shared<SettingsState>();
+}
+
+void PlayState::openPause()
+{
+    SL_LOG_DEBUG("Toggling pause");
+
+    if (m_isPaused)
+    {
+        m_isPaused = false;
+
+        if (m_topState)
+        {
+            m_topState = nullptr;
+        }
+    }
     else
     {
-        m_topState->update();
+        m_isPaused = true;
+
+        m_topState = std::make_shared<PauseState>();
     }
 }
 
@@ -188,18 +177,7 @@ void PlayState::handleEvent(const sf::Event &event)
         switch (event.key.code)
         {
             case sf::Keyboard::Escape:
-                SL_LOG_DEBUG("Toggling pause");
-                m_isPaused = !m_isPaused;
-                if (m_topState)
-                {
-                    m_topState->destroy();
-                    m_topState = nullptr;
-                }
-                else
-                {
-                    m_topState = std::make_unique<PauseState>();
-                    m_topState->create();
-                }
+                openPause();
 
                 break;
             default:
@@ -232,8 +210,6 @@ void PlayState::render()
         m_topState->render();
     }
 }
-
-void PlayState::destroy() {}
 
 // std::shared_ptr<GameObject> PlayState::getGameObject(const uint64_t id)
 // {

@@ -14,12 +14,11 @@
 class SettingsState final : public State
 {
 public:
+    SettingsState();
     std::string getName() override { return "Settings"; }
 
-    void create() override;
     void update() override;
     void render() override;
-    void destroy() override;
 
     bool continueGame() const { return m_continueGame; }
     bool restartGame() const { return m_restartGame; }

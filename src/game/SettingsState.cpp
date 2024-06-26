@@ -4,8 +4,10 @@
 #include "AssetManager.h"
 #include "GeometryDash.h"
 
+#include <cmath>
 
-void SettingsState::create()
+
+SettingsState::SettingsState()
 {
     const sf::Vector2f settingsPanelSize{320, 200};
 
@@ -56,10 +58,10 @@ void SettingsState::create()
                             0.0f,
                             false};
 
-    m_musicVolumeV.setTexture(AssetManager::getInstance().getTexture("musicVolumeLvl1"));
+    m_musicVolumeV.setTexture(AssetManager::getInstance().getTexture("musicVolume"));
     m_musicVolumeV.setPosition(startPos + sf::Vector2f(5, 90));
 
-    m_sfxVolumeV.setTexture(AssetManager::getInstance().getTexture("sfxVolumeLvl1"));
+    m_sfxVolumeV.setTexture(AssetManager::getInstance().getTexture("sfxVolume"));
     m_sfxVolumeV.setPosition(startPos + sf::Vector2f(5, 145));
 
     m_musicVolumeSlider = Slider(startPos + sf::Vector2f(42, 90), 200, sliderStyle);
@@ -93,6 +95,22 @@ void SettingsState::update()
     }
 }
 
+int convert(const int percent)
+{
+    if (percent < 10)
+    {
+        return 0;
+    }
+
+    if (percent < 40)
+        return 1;
+
+    if (percent < 80)
+        return 2;
+
+    return 3;
+}
+
 void SettingsState::render()
 {
     m_settingsPanel.render();
@@ -101,14 +119,29 @@ void SettingsState::render()
     m_restartButton.render();
     m_quitButton.render();
 
+    const auto vSize = sf::Vector2i(AssetManager::getInstance().getTexture("musicVolume").getSize());
+    const auto sSize = sf::Vector2i(AssetManager::getInstance().getTexture("sfxVolume").getSize());
+    constexpr int vFrames = 4;
+    constexpr int sFrames = 4;
+
+    const int musicLoc =
+            static_cast<int>(std::floor(m_musicVolumeSlider.getValue() / m_musicVolumeSlider.getMaxValue() * 100));
+    const int sfxLoc =
+            static_cast<int>(std::floor(m_sfxVolumeSlider.getValue() / m_sfxVolumeSlider.getMaxValue() * 100));
+
+
+    m_musicVolumeV.setTextureRect(sf::IntRect(convert(musicLoc) * vSize.x / vFrames, 0, vSize.x / vFrames, vSize.y));
+    m_sfxVolumeV.setTextureRect(sf::IntRect(convert(sfxLoc) * sSize.x / sFrames, 0, sSize.x / sFrames, sSize.y));
+
+    m_musicVolumeV.setScale(sf::Vector2f(0.5, 0.5));
+    m_sfxVolumeV.setScale(sf::Vector2f(0.5, 0.5));
+
     GeometryDash::getInstance().getWindow().getWindow().draw(m_musicVolumeV);
     GeometryDash::getInstance().getWindow().getWindow().draw(m_sfxVolumeV);
 
     m_musicVolumeSlider.render();
     m_sfxVolumeSlider.render();
 }
-
-void SettingsState::destroy() {}
 
 void SettingsState::handleEvent(const sf::Event &event)
 {

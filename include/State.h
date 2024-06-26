@@ -16,14 +16,12 @@ public:
 
     virtual std::string getName() = 0;
 
-    virtual void create() {}
     virtual void handleEvent(const sf::Event &event) {}
     virtual void update() = 0;
     virtual void render() = 0;
-    virtual void destroy() {}
 
     virtual bool handleCloseEvent() { return false; }
-    bool quit() const { return m_quit; }
+    [[nodiscard]] bool quit() const { return m_quit; }
 
 protected:
     bool m_quit = false;
