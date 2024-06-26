@@ -13,6 +13,46 @@ bool inside(const sf::Vector2f &point, const sf::FloatRect &rect)
            point.y <= rect.top + rect.height;
 }
 
+enum Direction
+{
+    NONE,
+    LEFT,
+    RIGHT,
+    DOWN
+};
+
+sf::FloatRect rotateRectUp(const sf::FloatRect &rect, const sf::FloatRect &respect, Direction dir)
+{
+    sf::FloatRect rotatedRect;
+    rotatedRect.height = rect.height;
+    rotatedRect.width = rect.width;
+
+    const sf::Vector2f origin(respect.left + (respect.width / 2), respect.top + (respect.height / 2));
+
+    switch (dir)
+    {
+        case LEFT:
+            rotatedRect.left = rect.top - origin.y;
+            rotatedRect.top = rect.left - origin.x;
+            break;
+        case RIGHT:
+            rotatedRect.left = rect.top - origin.y;
+            rotatedRect.top = -(rect.left - origin.x) - rect.width;
+            break;
+        case DOWN:
+            rotatedRect.left = rect.left - origin.x;
+            rotatedRect.top = -(rect.top - origin.y) - rect.height;
+            break;
+        case NONE:
+            return rect; // No rotation
+    }
+
+    rotatedRect.left += origin.x;
+    rotatedRect.top += origin.y;
+
+    return rotatedRect;
+}
+
 uint64_t ArenaItem::s_idCounter = 0;
 
 ArenaItem::ArenaItem(const std::shared_ptr<sf::Texture> &texture, const sf::Vector2f &position,
@@ -38,8 +78,6 @@ void ArenaItem::setAnimation(const int minFrame, const int maxFrame, const int f
 
 bool ArenaItem::collideTallSpike(const sf::FloatRect &shape) const
 {
-    return false; // temporarily disabled
-
     const sf::FloatRect m_shape = m_sprite.getGlobalBounds();
     // Quick optimization
     if (!m_shape.intersects(shape))
@@ -47,22 +85,44 @@ bool ArenaItem::collideTallSpike(const sf::FloatRect &shape) const
         return false;
     }
 
-    // Middle of the enemy is inside the shape, collision is guaranteed
-    if (inside(shape.getPosition() + sf::Vector2f{shape.getSize().x / 2, shape.getSize().y / 2}, m_shape))
+    // Process with the spike pointing up
+    Direction dir;
+    switch (m_currentFrame)
+    {
+        case 0:
+            dir = NONE;
+            break;
+        case 1:
+            dir = DOWN;
+            break;
+        case 2:
+            dir = LEFT;
+            break;
+        default:
+            dir = RIGHT;
+            break;
+    }
+    const sf::FloatRect rotatedShape = rotateRectUp(shape, m_shape, dir);
+
+    // Middle of the enemy is inside the rotatedShape, collision is guaranteed
+    if (inside(rotatedShape.getPosition() + sf::Vector2f{rotatedShape.getSize().x / 2, rotatedShape.getSize().y / 2},
+               m_shape))
     {
         return true;
     }
-    if (inside({shape.getPosition().x + shape.getSize().x, shape.getPosition().y + shape.getSize().y}, shape) and
-        !inside({shape.getPosition().x, shape.getPosition().y + shape.getSize().y}, shape))
+    if (inside({rotatedShape.getPosition().x + rotatedShape.getSize().x,
+                rotatedShape.getPosition().y + rotatedShape.getSize().y},
+               rotatedShape) and
+        !inside({rotatedShape.getPosition().x, rotatedShape.getPosition().y + rotatedShape.getSize().y}, rotatedShape))
     {
         // right corner inside the box
         // Check which side of the box the corner is in
-        if (shape.getPosition().x < m_shape.getPosition().x + (m_shape.getSize().x / 2))
+        if (rotatedShape.getPosition().x < m_shape.getPosition().x + (m_shape.getSize().x / 2))
         {
             // Check the position of the corner via the slope?
             if (const sf::Vector2f slope =
-                        sf::Vector2f(shape.getPosition().x + shape.getPosition().x,
-                                     shape.getPosition().y + shape.getSize().y) -
+                        sf::Vector2f(rotatedShape.getPosition().x + rotatedShape.getPosition().x,
+                                     rotatedShape.getPosition().y + rotatedShape.getSize().y) -
                         sf::Vector2f(m_shape.getPosition().x + m_shape.getPosition().x, m_shape.getPosition().y);
                 slope.y / slope.x > -1.79) // cot 22.5
             {
@@ -74,15 +134,18 @@ bool ArenaItem::collideTallSpike(const sf::FloatRect &shape) const
 
         return true;
     }
-    if (inside({shape.getPosition().x, shape.getPosition().y + shape.getSize().y}, shape) and
-        !inside({shape.getPosition().x + shape.getSize().x, shape.getPosition().y + shape.getSize().y}, shape))
+    if (inside({rotatedShape.getPosition().x, rotatedShape.getPosition().y + rotatedShape.getSize().y},
+               rotatedShape) and
+        !inside({rotatedShape.getPosition().x + rotatedShape.getSize().x,
+                 rotatedShape.getPosition().y + rotatedShape.getSize().y},
+                rotatedShape))
     {
         // left corner inside the box
-        if (shape.getPosition().x > m_shape.getPosition().x + (m_shape.getSize().x / 2))
+        if (rotatedShape.getPosition().x > m_shape.getPosition().x + (m_shape.getSize().x / 2))
         {
-            if (const sf::Vector2f slope =
-                        sf::Vector2f(shape.getPosition().x, shape.getPosition().y + shape.getSize().y) -
-                        sf::Vector2f(m_shape.getPosition().x, m_shape.getPosition().y);
+            if (const sf::Vector2f slope = sf::Vector2f(rotatedShape.getPosition().x,
+                                                        rotatedShape.getPosition().y + rotatedShape.getSize().y) -
+                                           sf::Vector2f(m_shape.getPosition().x, m_shape.getPosition().y);
                 slope.y / slope.x > 0.41) // cot 67.5
             {
                 return false;
@@ -99,7 +162,14 @@ bool ArenaItem::collideTallSpike(const sf::FloatRect &shape) const
 
 bool ArenaItem::collideSmallSpike(const sf::FloatRect &shape) const
 {
-    const sf::FloatRect m_shape = m_sprite.getGlobalBounds();
+    sf::FloatRect m_shape = m_sprite.getGlobalBounds();
+    m_shape.height /= 2;
+    // Quick optimization
+    if (!m_shape.intersects(shape))
+    {
+        return false;
+    }
+
     return false; // temporarily disabled
 }
 

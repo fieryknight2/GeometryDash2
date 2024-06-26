@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include <functional>
+#include "SFML/Graphics.hpp"
 
 struct ButtonStyle
 {
