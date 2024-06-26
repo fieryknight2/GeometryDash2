@@ -3,6 +3,7 @@
 
 #include "AssetManager.h"
 #include "GeometryDash.h"
+#include "simplelogger.hpp"
 
 void Slider::render()
 {
@@ -55,6 +56,7 @@ void Slider::render()
 
 void Slider::handleEvent(const sf::Event &event)
 {
+    SL_ASSERT_TRUE(m_length != 0, "Slider length cannot be 0");
     const float minX = m_rect.getPosition().x;
     const float maxX = minX + m_length;
     const auto mousePos = sf::Vector2f(sf::Mouse::getPosition(GeometryDash::getInstance().getWindow().getWindow()));
@@ -65,8 +67,8 @@ void Slider::handleEvent(const sf::Event &event)
         {
             if (m_ball.getGlobalBounds().contains(mousePos.x, mousePos.y))
             {
-                const float newX = std::clamp(windowSize.x - mousePos.x, minX, maxX);
-                m_value = m_max * (maxX - newX) / m_length;
+                const float newX = std::clamp(mousePos.x, minX, maxX);
+                m_value = m_max * (newX - minX) / m_length;
                 m_ball.setPosition(sf::Vector2f(maxX - m_value, m_ball.getPosition().y));
                 m_isDragging = true;
             }
@@ -78,8 +80,8 @@ void Slider::handleEvent(const sf::Event &event)
     {
         if (m_isDragging)
         {
-            const float newX = std::clamp(windowSize.x - mousePos.x, minX, maxX);
-            m_value = m_max * (maxX - newX) / m_length;
+            const float newX = std::clamp(mousePos.x, minX, maxX);
+            m_value = m_max * (newX - minX) / m_length;
             m_ball.setPosition(sf::Vector2f(maxX - m_value, m_ball.getPosition().y));
             m_isDragging = true;
         }

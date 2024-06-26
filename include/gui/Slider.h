@@ -91,3 +91,18 @@ private:
 
     bool m_isDragging = false;
 };
+
+const SliderStyle defaultSliderStyle{10,
+                                     sf::Color{255, 255, 255},
+                                     1.0f,
+                                     10.0f,
+                                     sf::Color(170, 170, 170),
+                                     1.0f,
+                                     sf::Color(0, 0, 0),
+                                     20.0f,
+                                     sf::Font(),
+                                     true,
+                                     true,
+                                     14.0f,
+                                     0.0f,
+                                     false};
