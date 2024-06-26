@@ -131,12 +131,17 @@ void IconButton::update()
     }
     if (m_active == true and clicked == false)
     {
-        m_wasPressed = true;
-        if (m_clickedCallback)
+        if (m_shape.getGlobalBounds().contains(
+                    sf::Vector2f(sf::Mouse::getPosition(GeometryDash::getInstance().getWindow().getWindow()))))
         {
-            m_clickedCallback();
+            m_wasPressed = true;
+            if (m_clickedCallback)
+            {
+                m_clickedCallback();
+            }
         }
     }
+
     m_active = clicked;
 }
 
