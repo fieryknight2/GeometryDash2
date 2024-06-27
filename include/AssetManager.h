@@ -10,6 +10,8 @@
 #include "SFML/Graphics/Texture.hpp"
 #include "game/Arena.h"
 
+sf::Color fromHSL(float h, float s, float l);
+
 class AssetManager
 {
 public:

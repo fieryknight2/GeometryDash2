@@ -5,8 +5,10 @@
 #include "game/SettingsState.h"
 #include "simplelogger.hpp"
 
+#include <chrono>
 #include <cmath>
 #include <format>
+#include <random>
 
 #include "AssetManager.h"
 
@@ -67,6 +69,14 @@ PlayState::PlayState()
 
     m_settingsButton.setClickedCallback([this] { this->openSettings(); });
     m_pauseButton.setClickedCallback([this] { this->openPause(); });
+
+    std::default_random_engine generator{
+            static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count())};
+    std::uniform_real_distribution<> distribution(0.0f, 1.0f);
+    m_dt = distribution(generator);
+    m_hue = static_cast<float>(std::abs(std::sin(m_dt)));
+    m_backgroundColor = fromHSL(m_hue, m_saturation + 0.1f, m_lightness);
+    GeometryDash::getInstance().getWindow().setClearColor(m_backgroundColor);
 }
 
 void PlayState::update()
@@ -133,6 +143,19 @@ void PlayState::update()
                 std::min(1.0f, m_cameraSmoothSpeed * GeometryDash::getInstance().getDeltaTime().asSeconds());
         m_cameraPos.y = std::lerp(m_cameraPos.y, -m_player.getPosition().y + m_cameraOffset.y, lerpSpeed);
     }
+
+    // Color
+
+    m_dt += GeometryDash::getInstance().getDeltaTime().asSeconds() / 10;
+
+    if (m_dt > 200)
+    {
+        m_dt = 0;
+    }
+    m_hue = static_cast<float>(std::abs(std::sin(m_dt)));
+
+    m_backgroundColor = fromHSL(m_hue, m_saturation + 0.1f, m_lightness);
+    GeometryDash::getInstance().getWindow().setClearColor(m_backgroundColor);
 }
 
 void PlayState::openSettings()
@@ -198,7 +221,7 @@ void PlayState::render()
     // Draw FPS counter on top to preserve z index
     GeometryDash::getInstance().getWindow().getWindow().draw(m_fpsCounter);
 
-    m_arena.render(m_cameraPos);
+    m_arena.render(m_cameraPos, fromHSL(m_hue, m_saturation, m_lightness));
     // m_player.render(m_cameraPos);
     m_player.render(m_cameraPos);
 
@@ -223,3 +246,5 @@ void PlayState::render()
 //
 //     return *value;
 // }
+
+PlayState::~PlayState() { GeometryDash::getInstance().getWindow().setClearColor(sf::Color::White); }

@@ -268,6 +268,9 @@ void Arena::createWorld(const std::vector<TileSet> &set)
             const bool flippedHorizontally = (value & FLIPPED_HORIZONTALLY_FLAG) != 0;
             const bool flippedVertically = (value & FLIPPED_VERTICALLY_FLAG) != 0;
             const bool flippedDiagonally = (value & FLIPPED_DIAGONALLY_FLAG) != 0;
+            // if (flippedHorizontally and flippedVertically and flippedDiagonally)
+            //     SL_LOGF_DEBUG("flipped horizontally: {}, flipped vertically: {}, flipped diagonally: {}",
+            //                   flippedHorizontally, flippedVertically, flippedDiagonally);
 
             // Clear the flags
             value &= ~(FLIPPED_HORIZONTALLY_FLAG | FLIPPED_VERTICALLY_FLAG | FLIPPED_DIAGONALLY_FLAG |
@@ -451,7 +454,7 @@ void Arena::update()
     }
 }
 
-void Arena::render(const sf::Vector2f &cameraPos)
+void Arena::render(const sf::Vector2f &cameraPos, sf::Color tint)
 {
     for (auto &arenaItem: m_objects)
     {
@@ -464,7 +467,7 @@ void Arena::render(const sf::Vector2f &cameraPos)
         //     continue;
 
         arenaItem.setRelativePosition(m_position);
-        arenaItem.render(cameraPos);
+        arenaItem.render(cameraPos, tint);
     }
 }
 

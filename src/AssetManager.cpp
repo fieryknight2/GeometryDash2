@@ -1,7 +1,75 @@
 /* Created by Matthew Brown on 6/22/2024 */
 #include "AssetManager.h"
 
+#include <cmath>
 #include "simplelogger.hpp"
+
+struct Color
+{
+    Color() = default;
+    Color(const float r, const float g, const float b) : r(r), g(g), b(b) {}
+
+    float r = 0;
+    float g = 0;
+    float b = 0;
+};
+
+Color hueToRGB(float hue, float c, float x)
+{
+    while (hue < 0.0f)
+    {
+        hue += 1.0f;
+    }
+    while (hue > 1.0f)
+    {
+        hue -= 1.0f;
+    }
+    // for ease
+    const float conv = hue * 360.0f;
+
+    if (conv < 60)
+    {
+        return {c, x, 0};
+    }
+    if (60 == conv or conv < 120)
+    {
+        return {x, c, 0};
+    }
+    if (120 == conv or conv < 180)
+    {
+        return {0, c, x};
+    }
+    if (180 == conv or conv < 240)
+    {
+        return {0, x, c};
+    }
+    if (240 == conv or conv < 300)
+    {
+        return {x, 0, c};
+    }
+    if (300 == conv or conv < 360)
+    {
+        return {c, 0, x};
+    }
+
+    return {0, 0, 0};
+}
+
+sf::Color fromHSL(const float h, const float s, const float l)
+{
+    /* Requires h, s, and l in the range of [0, 1] */
+
+    // https://www.rapidtables.com/convert/color/hsl-to-rgb.html
+    const float c = (1 - std::abs(2.0f * l - 1.0f)) * s;
+    const float x = c * (1 - std::abs(std::fmod(h * 6, 2.0f) - 1.0f));
+    const float m = l - c / 2;
+
+    // SL_LOGF_DEBUG("h: {}, c: {}, x: {}, m: {}", h, c, x, m);
+    Color p = hueToRGB(h, c, x);
+
+    return {static_cast<sf::Uint8>((p.r + m) * 255), static_cast<sf::Uint8>((p.g + m) * 255),
+            static_cast<sf::Uint8>((p.b + m) * 255)};
+}
 
 AssetManager AssetManager::S_instance{};
 

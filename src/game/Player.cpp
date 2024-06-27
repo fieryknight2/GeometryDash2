@@ -77,9 +77,8 @@ void Player::update(Arena &arena)
     m_sprite.setPosition(m_position);
     if (const ArenaItem *collide = arena.collidePlayer(m_sprite.getGlobalBounds()); collide != nullptr)
     {
-        if (collide->getType() == ArenaItemType::Spike)
+        if (collide->getType() == ArenaItemType::Spike or collide->getType() == ArenaItemType::TinySpike)
         {
-            // SL_LOGF_DEBUG("Player collided with a spike: {}", collide->getId());
             m_isDead = true;
             return; // No further processing to be done
         }
@@ -111,7 +110,7 @@ void Player::update(Arena &arena)
         m_sprite.setPosition(m_position);
         if (collide = arena.collidePlayer(m_sprite.getGlobalBounds()); collide != nullptr)
         {
-            if (collide->getType() == ArenaItemType::Spike)
+            if (collide->getType() == ArenaItemType::Spike or collide->getType() == ArenaItemType::TinySpike)
             {
                 // SL_LOGF_DEBUG("Player collided with a spike: {}", collide->getId());
                 m_isDead = true;

@@ -164,17 +164,93 @@ bool ArenaItem::collideSmallSpike(const sf::FloatRect &shape) const
 {
     sf::FloatRect m_shape = m_sprite.getGlobalBounds();
     m_shape.height /= 2;
+    m_shape.top += m_shape.height;
+
     // Quick optimization
     if (!m_shape.intersects(shape))
     {
         return false;
     }
 
-    return false; // temporarily disabled
+    // Process with the spike pointing up
+    Direction dir;
+    switch (m_currentFrame)
+    {
+        case 0:
+            dir = NONE;
+            break;
+        case 1:
+            dir = DOWN;
+            break;
+        case 2:
+            dir = LEFT;
+            break;
+        default:
+            dir = RIGHT;
+            break;
+    }
+    const sf::FloatRect rotatedShape = rotateRectUp(shape, m_shape, dir);
+
+    // Middle of the enemy is inside the rotatedShape, collision is guaranteed
+    if (inside(rotatedShape.getPosition() + sf::Vector2f{rotatedShape.getSize().x / 2, rotatedShape.getSize().y / 2},
+               m_shape))
+    {
+        return true;
+    }
+
+    if (inside({rotatedShape.getPosition().x + rotatedShape.getSize().x,
+                rotatedShape.getPosition().y + rotatedShape.getSize().y},
+               rotatedShape) and
+        !inside({rotatedShape.getPosition().x, rotatedShape.getPosition().y + rotatedShape.getSize().y}, rotatedShape))
+    {
+        // right corner inside the box
+        // Check which side of the box the corner is in
+        if (rotatedShape.getPosition().x < m_shape.getPosition().x + (m_shape.getSize().x / 2))
+        {
+            // Check the position of the corner via the slope?
+            if (const sf::Vector2f slope =
+                        sf::Vector2f(rotatedShape.getPosition().x + rotatedShape.getPosition().x,
+                                     rotatedShape.getPosition().y + rotatedShape.getSize().y) -
+                        sf::Vector2f(m_shape.getPosition().x + m_shape.getPosition().x, m_shape.getPosition().y);
+                slope.y / slope.x > -1.79) // cot 22.5
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        return true;
+    }
+    if (inside({rotatedShape.getPosition().x, rotatedShape.getPosition().y + rotatedShape.getSize().y},
+               rotatedShape) and
+        !inside({rotatedShape.getPosition().x + rotatedShape.getSize().x,
+                 rotatedShape.getPosition().y + rotatedShape.getSize().y},
+                rotatedShape))
+    {
+        // left corner inside the box
+        if (rotatedShape.getPosition().x > m_shape.getPosition().x + (m_shape.getSize().x / 2))
+        {
+            if (const sf::Vector2f slope = sf::Vector2f(rotatedShape.getPosition().x,
+                                                        rotatedShape.getPosition().y + rotatedShape.getSize().y) -
+                                           sf::Vector2f(m_shape.getPosition().x, m_shape.getPosition().y);
+                slope.y / slope.x > 0.41) // cot 67.5
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        return true;
+    }
+    return false;
 }
 
 bool ArenaItem::collides(const sf::FloatRect &shape)
 {
+    m_sprite.setScale(1, 1);
+    m_sprite.setRotation(0);
     m_sprite.setPosition(m_position - m_relativePosition);
     bool collides = false;
 
@@ -215,60 +291,55 @@ void ArenaItem::update()
     }
 }
 
-void ArenaItem::render(const sf::Vector2f &cameraPos)
+void ArenaItem::render(const sf::Vector2f &cameraPos, sf::Color tint)
 {
     // SL_LOG_DEBUG(std::format("Rendering item at location ({}, {})", m_position.x - m_relativePosition.x,
     //                          m_position.y - m_relativePosition.y));
     m_sprite.setPosition(m_position - m_relativePosition + cameraPos);
-    // m_sprite.setOrigin(sf::Vector2f(m_size.x / 2, m_size.y / 2));
     m_sprite.setTexture(*m_texture);
 
+    m_sprite.setColor(tint);
+
     const sf::Vector2i frame(m_currentFrame % m_texFrameCount.x, std::floor(m_currentFrame / m_texFrameCount.x));
-    sf::IntRect rect{sf::Vector2i(frame.x * static_cast<int>(m_size.x), frame.y * static_cast<int>(m_size.y)) +
-                             sf::Vector2i(m_padding.x * frame.x, m_padding.y * frame.y),
-                     sf::Vector2i(static_cast<int>(m_size.x), static_cast<int>(m_size.y))};
+    const sf::IntRect rect{sf::Vector2i(frame.x * static_cast<int>(m_size.x), frame.y * static_cast<int>(m_size.y)) +
+                                   sf::Vector2i(m_padding.x * frame.x, m_padding.y * frame.y),
+                           sf::Vector2i(static_cast<int>(m_size.x), static_cast<int>(m_size.y))};
 
-    const sf::Vector2i texSize(static_cast<int>(m_size.x * static_cast<float>(m_texFrameCount.x)),
-                               static_cast<int>(m_size.y * static_cast<float>(m_texFrameCount.y)));
+    float scaleX = 1;
+    float scaleY = 1;
+    if (m_flippedDiagonally)
+    {
+        // Tiled is weird.
+        m_sprite.setRotation(-90);
+        m_sprite.setPosition(m_sprite.getPosition() + sf::Vector2f(m_size.x, 0));
 
-    // TODO: Fix flipping not working
-    // m_sprite.setScale(1, 1);
-    // if (m_flippedDiagonally)
-    // {
-    //     m_sprite.setScale(1, -1);
-    // }
-    // else if (m_flippedHorizontally)
-    // {
-    //     m_sprite.setScale(-1, 1);
-    // }
-    // else if (m_flippedVertically)
-    // {
-    //     m_sprite.setScale(1, -1);
-    // }
+        if (m_flippedHorizontally)
+        {
+            scaleX = -1;
+            m_sprite.setPosition(m_sprite.getPosition() + sf::Vector2f(-m_size.x, 0));
+        }
+        if (m_flippedVertically)
+        {
+            scaleY = -1;
+            m_sprite.setPosition(m_sprite.getPosition() + sf::Vector2f(0, m_size.y));
+        }
+    }
+    else
+    {
+        if (m_flippedHorizontally)
+        {
+            scaleX = -1;
+            m_sprite.setPosition(m_sprite.getPosition() + sf::Vector2f(m_size.x, 0));
+        }
+        if (m_flippedVertically)
+        {
+            scaleY = -1;
+            m_sprite.setPosition(m_sprite.getPosition() + sf::Vector2f(0, m_size.y));
+        }
+    }
+    m_sprite.setScale(scaleX, scaleY);
 
-    // if (m_flippedDiagonally)
-    // {
-    //     rect.top = texSize.y - rect.top;
-    //     rect.left = texSize.x - rect.left;
-    //
-    //     rect.height = -rect.height;
-    //     rect.width = -rect.width;
-    //
-    //     // SL_LOGF_DEBUG("Rendering frame {}, loc ({}, {}, {}, {})", m_currentFrame, rect.top, rect.left, rect.width,
-    //     //               rect.height);
-    // }
-    // else if (m_flippedHorizontally)
-    // {
-    //     rect.left = texSize.x - rect.left;
-    //     rect.width = -rect.width;
-    // }
-    // else if (m_flippedVertically)
-    // {
-    //     rect.top = texSize.y - rect.top;
-    //     rect.height = -rect.height;
-    // }
     m_sprite.setTextureRect(rect);
-
 
     GeometryDash::getInstance().getWindow().getWindow().draw(m_sprite);
 }

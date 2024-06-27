@@ -15,6 +15,7 @@ class PlayState final : public State
 {
 public:
     PlayState();
+    ~PlayState() override;
     std::string getName() override { return "Play"; }
 
     void update() override;
@@ -49,4 +50,11 @@ private:
 
     void openSettings();
     void openPause();
+
+    float m_hue;
+    sf::Color m_backgroundColor{0, 0, 200};
+    double m_dt = 0;
+
+    const float m_lightness = 0.8f;
+    const float m_saturation = 0.7f;
 };
