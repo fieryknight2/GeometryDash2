@@ -25,6 +25,8 @@ public:
 
     sf::Time getDeltaTime() const { return m_deltaTime; }
 
+    static bool RenderCollisionShapes;
+
 private:
     // Singleton
     static GeometryDash S_instance;

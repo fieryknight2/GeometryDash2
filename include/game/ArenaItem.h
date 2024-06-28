@@ -9,9 +9,10 @@
 #include <functional>
 #include <memory>
 
-#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
+
+#include "Collision.h"
 
 enum class ArenaItemType
 {
@@ -40,7 +41,8 @@ public:
 
     [[nodiscard]] uint64_t getId() const { return m_id; }
 
-    void setType(const ArenaItemType type) { m_type = type; }
+    void regenCollider();
+    void setType(ArenaItemType type);
     [[nodiscard]] ArenaItemType getType() const { return m_type; }
 
     [[nodiscard]] bool collides(const sf::FloatRect &shape);
@@ -86,6 +88,7 @@ private:
     bool m_flippedVertically = false;
     bool m_flippedDiagonally = false;
 
-    bool collideTallSpike(const sf::FloatRect &shape) const;
-    bool collideSmallSpike(const sf::FloatRect &shape) const;
+    std::shared_ptr<CollisionBox> m_collision = nullptr;
+
+    void setColliderPos();
 };

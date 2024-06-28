@@ -21,6 +21,7 @@ set(GEOMETRYDASH2_SOURCES
         include/game/ArenaItem.h
         include/game/PauseState.h
         include/game/SettingsState.h
+        include/game/Collision.h
         include/game/Player.h
         include/AssetManager.h
         include/gui/Panel.h
@@ -32,6 +33,7 @@ set(GEOMETRYDASH2_SOURCES
         src/game/Arena.cpp
         src/game/ArenaItem.cpp
         src/game/SettingsState.cpp
+        src/game/Collision.cpp
         src/gui/Button.cpp
         src/gui/Panel.cpp
         src/gui/Slider.cpp

@@ -3,6 +3,7 @@
 #include "SFML/Graphics/RectangleShape.hpp"
 #include "SFML/Window/Event.hpp"
 
+#include "game/Collision.h"
 #include "gui/Slider.h"
 
 #include <iostream>
@@ -32,20 +33,34 @@ int main()
     Slider slider{sf::Vector2f(100, 0), 200, style};
     slider.setValue(100);
     slider.setMinValue(0);
-    slider.setMaxValue(200);
+    slider.setMaxValue(400);
 
     Slider otherSlider{sf::Vector2f(100, 100), 200, style};
     otherSlider.setValue(100);
     otherSlider.setMinValue(0);
-    otherSlider.setMaxValue(200);
+    otherSlider.setMaxValue(400);
 
-    sf::CircleShape circle(50.f); // Rotate Around
-    circle.setFillColor(sf::Color::Blue);
-    circle.setPosition(sf::Vector2f(100.f, 0.f) + center);
+    std::vector points = {sf::Vector2f(0.f, 0.f), sf::Vector2f(100.f, 0.f), sf::Vector2f(50.f, -100.f)};
+    sf::ConvexShape triangle(3);
+    triangle.setPoint(0, points[0]);
+    triangle.setPoint(1, points[1]);
+    triangle.setPoint(2, points[2]);
+    triangle.setFillColor(sf::Color::Blue);
+    triangle.setPosition(sf::Vector2f(100.f, 0.f) + center);
+    TriangleCollider triangleCollider{points[0], points[1], points[2]};
+    triangleCollider.setPosition(triangle.getPosition());
 
+    sf::Vector2f rectInitPos = sf::Vector2f(-200.f, -200.f) + center;
     sf::RectangleShape rectangle(sf::Vector2f(100.f, 100.f));
     rectangle.setFillColor(sf::Color::Green);
-    rectangle.setPosition(sf::Vector2f(-50.f, 0.f) + center);
+    rectangle.setPosition(rectInitPos);
+    RectangleCollider rectangleCollider{rectangle.getPosition(), rectangle.getSize()};
+
+    sf::ConvexShape ctriangle(3);
+    ctriangle.setPoint(0, triangleCollider.getLeftPoint());
+    ctriangle.setPoint(1, triangleCollider.getRightPoint());
+    ctriangle.setPoint(2, triangleCollider.getTopPoint());
+    ctriangle.setFillColor(sf::Color::Black);
 
     while (window->isOpen())
     {
@@ -58,9 +73,23 @@ int main()
             slider.handleEvent(event);
         }
 
+        rectangle.setPosition(sf::Vector2f(rectInitPos + sf::Vector2f(slider.getValue(), otherSlider.getValue())));
+        rectangleCollider.setPosition(rectangle.getPosition());
+
+
+        if (triangleCollider.collides(rectangle.getGlobalBounds()))
+        {
+            rectangle.setFillColor(sf::Color::Red);
+        }
+        else
+        {
+            rectangle.setFillColor(sf::Color::Green);
+        }
+
         window->clear(sf::Color::White);
-        window->draw(circle);
+        window->draw(triangle);
         window->draw(rectangle);
+        window->draw(ctriangle);
         slider.render();
         otherSlider.render();
         window->display();

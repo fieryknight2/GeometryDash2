@@ -60,7 +60,6 @@ void Slider::handleEvent(const sf::Event &event)
     const float minX = m_rect.getPosition().x;
     const float maxX = minX + m_length;
     const auto mousePos = sf::Vector2f(sf::Mouse::getPosition(GeometryDash::getInstance().getWindow().getWindow()));
-    const auto windowSize = sf::Vector2f(GeometryDash::getInstance().getWindow().getWindow().getSize());
     if (event.type == sf::Event::MouseButtonPressed)
     {
         if (event.mouseButton.button == sf::Mouse::Left)

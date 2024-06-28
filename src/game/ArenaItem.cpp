@@ -7,52 +7,6 @@
 #include "GeometryDash.h"
 #include "simplelogger.hpp"
 
-bool inside(const sf::Vector2f &point, const sf::FloatRect &rect)
-{
-    return point.x >= rect.left and point.x <= rect.left + rect.width and point.y >= rect.top and
-           point.y <= rect.top + rect.height;
-}
-
-enum Direction
-{
-    NONE,
-    LEFT,
-    RIGHT,
-    DOWN
-};
-
-sf::FloatRect rotateRectUp(const sf::FloatRect &rect, const sf::FloatRect &respect, Direction dir)
-{
-    sf::FloatRect rotatedRect;
-    rotatedRect.height = rect.height;
-    rotatedRect.width = rect.width;
-
-    const sf::Vector2f origin(respect.left + (respect.width / 2), respect.top + (respect.height / 2));
-
-    switch (dir)
-    {
-        case LEFT:
-            rotatedRect.left = rect.top - origin.y;
-            rotatedRect.top = rect.left - origin.x;
-            break;
-        case RIGHT:
-            rotatedRect.left = rect.top - origin.y;
-            rotatedRect.top = -(rect.left - origin.x) - rect.width;
-            break;
-        case DOWN:
-            rotatedRect.left = rect.left - origin.x;
-            rotatedRect.top = -(rect.top - origin.y) - rect.height;
-            break;
-        case NONE:
-            return rect; // No rotation
-    }
-
-    rotatedRect.left += origin.x;
-    rotatedRect.top += origin.y;
-
-    return rotatedRect;
-}
-
 uint64_t ArenaItem::s_idCounter = 0;
 
 ArenaItem::ArenaItem(const std::shared_ptr<sf::Texture> &texture, const sf::Vector2f &position,
@@ -61,6 +15,97 @@ ArenaItem::ArenaItem(const std::shared_ptr<sf::Texture> &texture, const sf::Vect
     m_id(s_idCounter++), m_sprite(*texture), m_texture(texture), m_position(position), m_size(size),
     m_texFrameCount(frameCount), m_minFrame(0), m_maxFrame(0), m_frameRate(0), m_currentFrame(frame), m_padding(padding)
 {
+}
+
+void ArenaItem::regenCollider()
+{
+    enum Direction
+    {
+        LEFT,
+        RIGHT,
+        UP,
+        DOWN
+    };
+
+    Direction d = UP;
+    if (m_currentFrame == 0)
+        d = UP;
+    else if (m_currentFrame == 1)
+        d = DOWN;
+    else if (m_currentFrame == 2)
+        d = LEFT;
+    else if (m_currentFrame == 3)
+        d = RIGHT;
+
+    // Deal with flipping - On second thought, I'm not going to bother
+    // if (m_flippedHorizontally and d == UP or m_flippedHorizontally and d == DOWN)
+    //     d = (d == DOWN) ? UP : DOWN;
+    // if (m_flippedVertically and d == LEFT or m_flippedVertically and d == RIGHT)
+    //     d = (d == RIGHT) ? LEFT : RIGHT;
+
+    if (m_type == ArenaItemType::Spike)
+    {
+        sf::Vector2f leftPoint, rightPoint, topPoint;
+        switch (d)
+        {
+            case LEFT:
+                leftPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y + m_size.y);
+                rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y);
+                topPoint = sf::Vector2f(m_position.x, m_position.y + (m_size.y / 2));
+                break;
+            case RIGHT:
+                leftPoint = sf::Vector2f(m_position.x, m_position.y + m_size.y);
+                rightPoint = sf::Vector2f(m_position.x, m_position.y);
+                topPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y + (m_size.y / 2));
+                break;
+            case UP:
+                leftPoint = sf::Vector2f(m_position.x, m_position.y + m_size.y);
+                rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y + m_size.y);
+                topPoint = sf::Vector2f(m_position.x + (m_size.x / 2), m_position.y);
+                break;
+            case DOWN:
+                leftPoint = sf::Vector2f(m_position.x, m_position.y);
+                rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y);
+                topPoint = sf::Vector2f(m_position.x + (m_size.x / 2), m_position.y + m_size.y);
+                break;
+        }
+        m_collision = std::make_shared<TriangleCollider>(leftPoint, rightPoint, topPoint);
+    }
+    else if (m_type == ArenaItemType::TinySpike)
+    {
+        sf::Vector2f leftPoint, rightPoint;
+        sf::Vector2f topPoint{m_position.x + (m_size.x / 2), m_position.y + (m_size.y / 2)};
+        switch (d)
+        {
+            case LEFT:
+                leftPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y + m_size.y);
+                rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y);
+                break;
+            case RIGHT:
+                leftPoint = sf::Vector2f(m_position.x, m_position.y + m_size.y);
+                rightPoint = sf::Vector2f(m_position.x, m_position.y);
+                break;
+            case UP:
+                leftPoint = sf::Vector2f(m_position.x, m_position.y + m_size.y);
+                rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y + m_size.y);
+                break;
+            case DOWN:
+                leftPoint = sf::Vector2f(m_position.x, m_position.y);
+                rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y);
+                break;
+        }
+        m_collision = std::make_shared<TriangleCollider>(leftPoint, rightPoint, topPoint);
+    }
+    else
+    {
+        m_collision = std::make_shared<RectangleCollider>(m_position, m_size);
+    }
+}
+
+void ArenaItem::setType(const ArenaItemType type)
+{
+    m_type = type;
+    regenCollider();
 }
 
 void ArenaItem::resetIds()
@@ -76,175 +121,17 @@ void ArenaItem::setAnimation(const int minFrame, const int maxFrame, const int f
     m_frameRate = frameRate;
 }
 
-bool ArenaItem::collideTallSpike(const sf::FloatRect &shape) const
+void ArenaItem::setColliderPos()
 {
-    const sf::FloatRect m_shape = m_sprite.getGlobalBounds();
-    // Quick optimization
-    if (!m_shape.intersects(shape))
-    {
-        return false;
-    }
+    m_collision->setPosition(m_sprite.getPosition());
 
-    // Process with the spike pointing up
-    Direction dir;
-    switch (m_currentFrame)
+    if (m_type == ArenaItemType::TinySpike)
     {
-        case 0:
-            dir = NONE;
-            break;
-        case 1:
-            dir = DOWN;
-            break;
-        case 2:
-            dir = LEFT;
-            break;
-        default:
-            dir = RIGHT;
-            break;
-    }
-    const sf::FloatRect rotatedShape = rotateRectUp(shape, m_shape, dir);
-
-    // Middle of the enemy is inside the rotatedShape, collision is guaranteed
-    if (inside(rotatedShape.getPosition() + sf::Vector2f{rotatedShape.getSize().x / 2, rotatedShape.getSize().y / 2},
-               m_shape))
-    {
-        return true;
-    }
-    if (inside({rotatedShape.getPosition().x + rotatedShape.getSize().x,
-                rotatedShape.getPosition().y + rotatedShape.getSize().y},
-               rotatedShape) and
-        !inside({rotatedShape.getPosition().x, rotatedShape.getPosition().y + rotatedShape.getSize().y}, rotatedShape))
-    {
-        // right corner inside the box
-        // Check which side of the box the corner is in
-        if (rotatedShape.getPosition().x < m_shape.getPosition().x + (m_shape.getSize().x / 2))
+        if (m_currentFrame == 0)
         {
-            // Check the position of the corner via the slope?
-            if (const sf::Vector2f slope =
-                        sf::Vector2f(rotatedShape.getPosition().x + rotatedShape.getPosition().x,
-                                     rotatedShape.getPosition().y + rotatedShape.getSize().y) -
-                        sf::Vector2f(m_shape.getPosition().x + m_shape.getPosition().x, m_shape.getPosition().y);
-                slope.y / slope.x > -1.79) // cot 22.5
-            {
-                return false;
-            }
-
-            return true;
+            m_collision->setPosition(m_sprite.getPosition() + sf::Vector2f(0, m_size.y / 2));
         }
-
-        return true;
     }
-    if (inside({rotatedShape.getPosition().x, rotatedShape.getPosition().y + rotatedShape.getSize().y},
-               rotatedShape) and
-        !inside({rotatedShape.getPosition().x + rotatedShape.getSize().x,
-                 rotatedShape.getPosition().y + rotatedShape.getSize().y},
-                rotatedShape))
-    {
-        // left corner inside the box
-        if (rotatedShape.getPosition().x > m_shape.getPosition().x + (m_shape.getSize().x / 2))
-        {
-            if (const sf::Vector2f slope = sf::Vector2f(rotatedShape.getPosition().x,
-                                                        rotatedShape.getPosition().y + rotatedShape.getSize().y) -
-                                           sf::Vector2f(m_shape.getPosition().x, m_shape.getPosition().y);
-                slope.y / slope.x > 0.41) // cot 67.5
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-bool ArenaItem::collideSmallSpike(const sf::FloatRect &shape) const
-{
-    sf::FloatRect m_shape = m_sprite.getGlobalBounds();
-    m_shape.height /= 2;
-    m_shape.top += m_shape.height;
-
-    // Quick optimization
-    if (!m_shape.intersects(shape))
-    {
-        return false;
-    }
-
-    // Process with the spike pointing up
-    Direction dir;
-    switch (m_currentFrame)
-    {
-        case 0:
-            dir = NONE;
-            break;
-        case 1:
-            dir = DOWN;
-            break;
-        case 2:
-            dir = LEFT;
-            break;
-        default:
-            dir = RIGHT;
-            break;
-    }
-    const sf::FloatRect rotatedShape = rotateRectUp(shape, m_shape, dir);
-
-    // Middle of the enemy is inside the rotatedShape, collision is guaranteed
-    if (inside(rotatedShape.getPosition() + sf::Vector2f{rotatedShape.getSize().x / 2, rotatedShape.getSize().y / 2},
-               m_shape))
-    {
-        return true;
-    }
-
-    if (inside({rotatedShape.getPosition().x + rotatedShape.getSize().x,
-                rotatedShape.getPosition().y + rotatedShape.getSize().y},
-               rotatedShape) and
-        !inside({rotatedShape.getPosition().x, rotatedShape.getPosition().y + rotatedShape.getSize().y}, rotatedShape))
-    {
-        // right corner inside the box
-        // Check which side of the box the corner is in
-        if (rotatedShape.getPosition().x < m_shape.getPosition().x + (m_shape.getSize().x / 2))
-        {
-            // Check the position of the corner via the slope?
-            if (const sf::Vector2f slope =
-                        sf::Vector2f(rotatedShape.getPosition().x + rotatedShape.getPosition().x,
-                                     rotatedShape.getPosition().y + rotatedShape.getSize().y) -
-                        sf::Vector2f(m_shape.getPosition().x + m_shape.getPosition().x, m_shape.getPosition().y);
-                slope.y / slope.x > -1.79) // cot 22.5
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        return true;
-    }
-    if (inside({rotatedShape.getPosition().x, rotatedShape.getPosition().y + rotatedShape.getSize().y},
-               rotatedShape) and
-        !inside({rotatedShape.getPosition().x + rotatedShape.getSize().x,
-                 rotatedShape.getPosition().y + rotatedShape.getSize().y},
-                rotatedShape))
-    {
-        // left corner inside the box
-        if (rotatedShape.getPosition().x > m_shape.getPosition().x + (m_shape.getSize().x / 2))
-        {
-            if (const sf::Vector2f slope = sf::Vector2f(rotatedShape.getPosition().x,
-                                                        rotatedShape.getPosition().y + rotatedShape.getSize().y) -
-                                           sf::Vector2f(m_shape.getPosition().x, m_shape.getPosition().y);
-                slope.y / slope.x > 0.41) // cot 67.5
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        return true;
-    }
-    return false;
 }
 
 bool ArenaItem::collides(const sf::FloatRect &shape)
@@ -252,27 +139,23 @@ bool ArenaItem::collides(const sf::FloatRect &shape)
     m_sprite.setScale(1, 1);
     m_sprite.setRotation(0);
     m_sprite.setPosition(m_position - m_relativePosition);
-    bool collides = false;
 
-    const sf::FloatRect m_shape = m_sprite.getGlobalBounds();
-    if (m_type == ArenaItemType::Default)
+    setColliderPos();
+    SL_ASSERT(m_collision != nullptr, "No collider for this arena item");
+    if (!m_collision)
+        return false;
+
+    if (m_collision->collides(shape))
     {
-        collides = m_shape.intersects(shape);
-        if (collides and m_onCollision != nullptr)
+        if (m_onCollision != nullptr)
         {
             m_onCollision();
         }
-    }
-    else if (m_type == ArenaItemType::Spike)
-    {
-        collides = collideTallSpike(shape);
-    }
-    else if (m_type == ArenaItemType::TinySpike)
-    {
-        collides = collideSmallSpike(shape);
+
+        return true;
     }
 
-    return collides;
+    return false;
 }
 
 void ArenaItem::update()
@@ -342,4 +225,30 @@ void ArenaItem::render(const sf::Vector2f &cameraPos, sf::Color tint)
     m_sprite.setTextureRect(rect);
 
     GeometryDash::getInstance().getWindow().getWindow().draw(m_sprite);
+
+    if (GeometryDash::RenderCollisionShapes)
+    {
+        if (m_type == ArenaItemType::TinySpike or m_type == ArenaItemType::Spike)
+        {
+            setColliderPos();
+            sf::ConvexShape shape(3);
+            shape.setPoint(0, std::dynamic_pointer_cast<TriangleCollider>(m_collision)->getLeftPoint());
+            shape.setPoint(1, std::dynamic_pointer_cast<TriangleCollider>(m_collision)->getRightPoint());
+            shape.setPoint(2, std::dynamic_pointer_cast<TriangleCollider>(m_collision)->getTopPoint());
+            shape.setFillColor(sf::Color(20, 20, 20, 20));
+            shape.setOutlineColor(sf::Color::Blue);
+            shape.setOutlineThickness(1);
+            // shape.setPosition(m_sprite.getPosition());
+            GeometryDash::getInstance().getWindow().getWindow().draw(shape);
+        }
+        else
+        {
+            // sf::RectangleShape shape(m_size);
+            // shape.setPosition(m_sprite.getPosition());
+            // shape.setFillColor(sf::Color::Transparent);
+            // shape.setOutlineColor(sf::Color::Blue);
+            // shape.setOutlineThickness(1);
+            // GeometryDash::getInstance().getWindow().getWindow().draw(shape);
+        }
+    }
 }

@@ -309,6 +309,7 @@ void Arena::createWorld(const std::vector<TileSet> &set)
             m_objects.back().setFlippedHorizontally(flippedHorizontally);
             m_objects.back().setFlippedVertically(flippedVertically);
             m_objects.back().setFlippedDiagonally(flippedDiagonally);
+            // m_objects.back().setOnCollision([]() { SL_LOG_DEBUG("Collision!"); });
 
             if (ts->name == "Spikes")
             {
@@ -318,9 +319,13 @@ void Arena::createWorld(const std::vector<TileSet> &set)
             {
                 m_objects.back().setType(ArenaItemType::TinySpike);
             }
-            else if (ts->name == "Default")
+            else if (ts->name == "Default" or ts->name == "SimpleTileSet")
             {
                 m_objects.back().setType(ArenaItemType::Default);
+            }
+            else
+            {
+                SL_LOGF_WARNING("Unknown object type: {}", ts->name);
             }
         }
     }
