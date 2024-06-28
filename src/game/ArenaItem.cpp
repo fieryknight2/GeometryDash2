@@ -130,15 +130,27 @@ void ArenaItem::setColliderPos()
 
     if (m_type == ArenaItemType::TinySpike)
     {
-        if (m_currentFrame == 0)
+        if (m_currentFrame == 0) // Up
         {
             m_collision->setPosition(m_sprite.getPosition() + sf::Vector2f(0, m_size.y / 2));
+        }
+        if (m_currentFrame == 1) // Down
+        {
+            m_collision->setPosition(m_sprite.getPosition() + sf::Vector2f(0, m_size.y / 2));
+        }
+        if (m_currentFrame == 2) // Left
+        {
+            m_collision->setPosition(m_sprite.getPosition() + sf::Vector2f(m_size.x / 2, 0));
         }
     }
 }
 
 bool ArenaItem::collides(const sf::FloatRect &shape)
 {
+#ifndef NDEBUG
+    m_collidedThisFrame = true;
+#endif // NDEBUG
+
     m_sprite.setScale(1, 1);
     m_sprite.setRotation(0);
     m_sprite.setPosition(m_position - m_relativePosition);
@@ -229,6 +241,7 @@ void ArenaItem::render(const sf::Vector2f &cameraPos, sf::Color tint)
 
     GeometryDash::getInstance().getWindow().getWindow().draw(m_sprite);
 
+#ifndef NDEBUG
     if (GeometryDash::RenderCollisionShapes)
     {
         if (m_type == ArenaItemType::TinySpike or m_type == ArenaItemType::Spike)
@@ -238,7 +251,14 @@ void ArenaItem::render(const sf::Vector2f &cameraPos, sf::Color tint)
             shape.setPoint(0, std::dynamic_pointer_cast<TriangleCollider>(m_collision)->getLeftPoint());
             shape.setPoint(1, std::dynamic_pointer_cast<TriangleCollider>(m_collision)->getRightPoint());
             shape.setPoint(2, std::dynamic_pointer_cast<TriangleCollider>(m_collision)->getTopPoint());
-            shape.setFillColor(sf::Color(20, 20, 20, 20));
+            if (m_collidedThisFrame)
+            {
+                shape.setFillColor(sf::Color(255, 0, 0, 170));
+            }
+            else
+            {
+                shape.setFillColor(sf::Color(20, 20, 20, 20));
+            }
             shape.setOutlineColor(sf::Color::Blue);
             shape.setOutlineThickness(1);
             GeometryDash::getInstance().getWindow().getWindow().draw(shape);
@@ -248,9 +268,15 @@ void ArenaItem::render(const sf::Vector2f &cameraPos, sf::Color tint)
             sf::RectangleShape shape(m_size);
             shape.setPosition(m_position - m_relativePosition + cameraPos);
             shape.setFillColor(sf::Color::Transparent);
+            if (m_collidedThisFrame)
+            {
+                shape.setFillColor(sf::Color(255, 0, 0, 170));
+            }
             shape.setOutlineColor(sf::Color::Blue);
             shape.setOutlineThickness(1);
             GeometryDash::getInstance().getWindow().getWindow().draw(shape);
         }
     }
+    m_collidedThisFrame = false;
+#endif // NDEBUG
 }

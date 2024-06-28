@@ -162,6 +162,7 @@ void Player::render(const sf::Vector2f &cameraPos)
     GeometryDash::getInstance().getWindow().getWindow().draw(m_sprite);
     m_sprite.setPosition(m_position);
 
+#ifndef NDEBUG
     if (GeometryDash::RenderCollisionShapes)
     {
         sf::RectangleShape rect{m_size};
@@ -171,6 +172,7 @@ void Player::render(const sf::Vector2f &cameraPos)
         rect.setOutlineThickness(1);
         GeometryDash::getInstance().getWindow().getWindow().draw(rect);
     }
+#endif // NDEBUG
 }
 
 void Player::handleEvent(const sf::Event &event)

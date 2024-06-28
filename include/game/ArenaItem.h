@@ -60,6 +60,11 @@ public:
 
     static void resetIds();
 
+#ifndef NDEBUG
+    [[nodiscard]] bool getCollidedThisFrame() const { return m_collidedThisFrame; }
+#else
+    [[nodiscard]] bool getCollidedThisFrame() const { return false; }
+#endif // NDEBUG
 private:
     static uint64_t s_idCounter;
     uint64_t m_id = 0;
@@ -91,4 +96,8 @@ private:
     std::shared_ptr<CollisionBox> m_collision = nullptr;
 
     void setColliderPos();
+
+#ifndef NDEBUG
+    bool m_collidedThisFrame = false;
+#endif
 };
