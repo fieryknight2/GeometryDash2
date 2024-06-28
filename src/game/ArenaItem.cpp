@@ -49,14 +49,14 @@ void ArenaItem::regenCollider()
         switch (d)
         {
             case LEFT:
-                leftPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y + m_size.y);
-                rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y);
-                topPoint = sf::Vector2f(m_position.x, m_position.y + (m_size.y / 2));
+                leftPoint = sf::Vector2f(m_position.x, m_position.y + (m_size.y / 2));
+                rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y + m_size.y);
+                topPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y);
                 break;
             case RIGHT:
                 leftPoint = sf::Vector2f(m_position.x, m_position.y + m_size.y);
-                rightPoint = sf::Vector2f(m_position.x, m_position.y);
-                topPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y + (m_size.y / 2));
+                rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y + (m_size.y / 2));
+                topPoint = sf::Vector2f(m_position.x, m_position.y);
                 break;
             case UP:
                 leftPoint = sf::Vector2f(m_position.x, m_position.y + m_size.y);
@@ -65,33 +65,36 @@ void ArenaItem::regenCollider()
                 break;
             case DOWN:
                 leftPoint = sf::Vector2f(m_position.x, m_position.y);
-                rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y);
-                topPoint = sf::Vector2f(m_position.x + (m_size.x / 2), m_position.y + m_size.y);
+                rightPoint = sf::Vector2f(m_position.x + (m_size.x / 2), m_position.y + m_size.y);
+                topPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y);
                 break;
         }
         m_collision = std::make_shared<TriangleCollider>(leftPoint, rightPoint, topPoint);
     }
     else if (m_type == ArenaItemType::TinySpike)
     {
-        sf::Vector2f leftPoint, rightPoint;
-        sf::Vector2f topPoint{m_position.x + (m_size.x / 2), m_position.y + (m_size.y / 2)};
+        sf::Vector2f leftPoint, rightPoint, topPoint;
         switch (d)
         {
             case LEFT:
-                leftPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y + m_size.y);
-                rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y);
+                leftPoint = sf::Vector2f(m_position.x + (m_size.x / 2), m_position.y + (m_size.y / 2));
+                rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y + m_size.y);
+                topPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y);
                 break;
             case RIGHT:
                 leftPoint = sf::Vector2f(m_position.x, m_position.y + m_size.y);
-                rightPoint = sf::Vector2f(m_position.x, m_position.y);
+                rightPoint = sf::Vector2f(m_position.x + (m_size.x / 2), m_position.y + (m_size.y / 2));
+                topPoint = sf::Vector2f(m_position.x, m_position.y);
                 break;
             case UP:
                 leftPoint = sf::Vector2f(m_position.x, m_position.y + m_size.y);
                 rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y + m_size.y);
+                topPoint = sf::Vector2f(m_position.x + (m_size.x / 2), m_position.y + (m_size.y / 2));
                 break;
             case DOWN:
                 leftPoint = sf::Vector2f(m_position.x, m_position.y);
                 rightPoint = sf::Vector2f(m_position.x + m_size.x, m_position.y);
+                topPoint = sf::Vector2f(m_position.x + (m_size.x / 2), m_position.y + (m_size.y / 2));
                 break;
         }
         m_collision = std::make_shared<TriangleCollider>(leftPoint, rightPoint, topPoint);
@@ -238,17 +241,16 @@ void ArenaItem::render(const sf::Vector2f &cameraPos, sf::Color tint)
             shape.setFillColor(sf::Color(20, 20, 20, 20));
             shape.setOutlineColor(sf::Color::Blue);
             shape.setOutlineThickness(1);
-            // shape.setPosition(m_sprite.getPosition());
             GeometryDash::getInstance().getWindow().getWindow().draw(shape);
         }
         else
         {
-            // sf::RectangleShape shape(m_size);
-            // shape.setPosition(m_sprite.getPosition());
-            // shape.setFillColor(sf::Color::Transparent);
-            // shape.setOutlineColor(sf::Color::Blue);
-            // shape.setOutlineThickness(1);
-            // GeometryDash::getInstance().getWindow().getWindow().draw(shape);
+            sf::RectangleShape shape(m_size);
+            shape.setPosition(m_position - m_relativePosition + cameraPos);
+            shape.setFillColor(sf::Color::Transparent);
+            shape.setOutlineColor(sf::Color::Blue);
+            shape.setOutlineThickness(1);
+            GeometryDash::getInstance().getWindow().getWindow().draw(shape);
         }
     }
 }

@@ -161,6 +161,16 @@ void Player::render(const sf::Vector2f &cameraPos)
                       m_size.y / static_cast<float>(m_animator.getSize().y));
     GeometryDash::getInstance().getWindow().getWindow().draw(m_sprite);
     m_sprite.setPosition(m_position);
+
+    if (GeometryDash::RenderCollisionShapes)
+    {
+        sf::RectangleShape rect{m_size};
+        rect.setPosition(m_position + cameraPos);
+        rect.setFillColor(sf::Color(20, 20, 20, 20));
+        rect.setOutlineColor(sf::Color::Blue);
+        rect.setOutlineThickness(1);
+        GeometryDash::getInstance().getWindow().getWindow().draw(rect);
+    }
 }
 
 void Player::handleEvent(const sf::Event &event)
