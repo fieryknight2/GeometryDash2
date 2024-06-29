@@ -142,7 +142,7 @@ void PlayState::update()
             // Restart
 
             // Temp
-            GeometryDash::getInstance().changeState(std::make_unique<PlayState>());
+            GeometryDash::getInstance().changeState(std::make_shared<PlayState>());
         }
 
         const float lerpSpeed =
