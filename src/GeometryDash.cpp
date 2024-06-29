@@ -30,7 +30,7 @@ void GeometryDash::run() noexcept(false)
     m_window.create(WindowSettings({1200, 800}, "Geometry Dash", sf::Style::Titlebar | sf::Style::Close));
 
     SL_LOG_DEBUG("Creating Main Menu state");
-    m_state = std::make_unique<MainMenuState>();
+    m_state = std::make_shared<MainMenuState>();
 
     m_window.getWindow().setFramerateLimit(120);
 

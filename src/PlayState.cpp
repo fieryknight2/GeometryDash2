@@ -110,11 +110,11 @@ void PlayState::update()
         }
         if (temp->restartGame())
         {
-            GeometryDash::getInstance().changeState(std::make_unique<PlayState>());
+            GeometryDash::getInstance().changeState(std::make_shared<PlayState>());
         }
         if (temp->toMenu())
         {
-            GeometryDash::getInstance().changeState(std::make_unique<MainMenuState>());
+            GeometryDash::getInstance().changeState(std::make_shared<MainMenuState>());
         }
     }
     else if (m_topState)
@@ -142,7 +142,7 @@ void PlayState::update()
             // Restart
 
             // Temp
-            GeometryDash::getInstance().changeState(std::make_unique<PlayState>());
+            GeometryDash::getInstance().changeState(std::make_shared<PlayState>());
         }
 
         const float lerpSpeed =
