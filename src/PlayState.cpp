@@ -46,11 +46,25 @@ PlayState::PlayState()
     m_settingsButton = IconButton(sf::Vector2f(windowSize.x, 10) - sf::Vector2f(150, 0), sf::Vector2f(50, 50),
                                   m_settingsTexture, buttonStyle);
 
+#ifndef NDEBUG
     m_fpsCounter.setFont(m_defaultFont);
     m_fpsCounter.setCharacterSize(30);
     m_fpsCounter.setPosition(sf::Vector2f(5, 5));
     m_fpsCounter.setFillColor(sf::Color::Black);
     m_fpsCounter.setString("FPS: 0");
+
+    m_collisionCounter.setFont(m_defaultFont);
+    m_collisionCounter.setCharacterSize(30);
+    m_collisionCounter.setPosition(sf::Vector2f(5, 40));
+    m_collisionCounter.setFillColor(sf::Color::Black);
+    m_collisionCounter.setString("Collisions: 0");
+
+    m_processedCounter.setFont(m_defaultFont);
+    m_processedCounter.setCharacterSize(30);
+    m_processedCounter.setPosition(sf::Vector2f(5, 75));
+    m_processedCounter.setFillColor(sf::Color::Black);
+    m_processedCounter.setString("Rendered: 0");
+#endif // NDEBUG
 
     m_arena = AssetManager::getInstance().getLevel("level-1");
 
@@ -81,19 +95,6 @@ PlayState::PlayState()
 
 void PlayState::update()
 {
-    m_avgFPS = static_cast<int>((std::floor(1000 / GeometryDash::getInstance().getDeltaTime().asMilliseconds())) +
-                                static_cast<float>(m_avgFPS)) /
-               2;
-    if (m_updateCount > 0.25)
-    {
-        m_updateCount = 0.0;
-        m_fpsCounter.setString("FPS: " + std::to_string(m_avgFPS));
-    }
-    else
-    {
-        m_updateCount += GeometryDash::getInstance().getDeltaTime().asSeconds();
-    }
-
     m_pauseButton.update();
     m_settingsButton.update();
 
@@ -129,6 +130,11 @@ void PlayState::update()
         m_arena.update();
         m_player.update(m_arena);
 
+#ifndef NDEBUG
+        m_collisionCounter.setString("Collisions: " + std::to_string(m_arena.getCollisionsThisFrame()));
+        m_processedCounter.setString("Rendered: " + std::to_string(m_arena.getRenderedLastFrame()));
+#endif // NDEBUG
+
         if (m_player.isDead() or
             m_player.getPosition().y >
                     static_cast<float>(GeometryDash::getInstance().getWindow().getWindow().getSize().y))
@@ -156,6 +162,22 @@ void PlayState::update()
 
     m_backgroundColor = fromHSL(m_hue, m_saturation + 0.1f, m_lightness);
     GeometryDash::getInstance().getWindow().setClearColor(m_backgroundColor);
+
+
+#ifndef NDEBUG
+    m_avgFPS = static_cast<int>((std::floor(1000 / GeometryDash::getInstance().getDeltaTime().asMilliseconds())) +
+                                static_cast<float>(m_avgFPS)) /
+               2;
+    if (m_updateCount > 0.25)
+    {
+        m_updateCount = 0.0;
+        m_fpsCounter.setString("FPS: " + std::to_string(m_avgFPS));
+    }
+    else
+    {
+        m_updateCount += GeometryDash::getInstance().getDeltaTime().asSeconds();
+    }
+#endif // NDEBUG
 }
 
 void PlayState::openSettings()
@@ -219,7 +241,14 @@ void PlayState::handleEvent(const sf::Event &event)
 void PlayState::render()
 {
     // Draw FPS counter on top to preserve z index
-    GeometryDash::getInstance().getWindow().getWindow().draw(m_fpsCounter);
+#ifndef NDEBUG
+    if (GeometryDash::EnableDebug)
+    {
+        GeometryDash::getInstance().getWindow().getWindow().draw(m_fpsCounter);
+        GeometryDash::getInstance().getWindow().getWindow().draw(m_collisionCounter);
+        GeometryDash::getInstance().getWindow().getWindow().draw(m_processedCounter);
+    }
+#endif // NDEBUG
 
     m_arena.render(m_cameraPos, fromHSL(m_hue, m_saturation, m_lightness));
     // m_player.render(m_cameraPos);

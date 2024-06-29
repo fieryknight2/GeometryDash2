@@ -6,7 +6,8 @@
 #include "simplelogger.hpp"
 
 GeometryDash GeometryDash::S_instance{};
-bool GeometryDash::RenderCollisionShapes = true;
+bool GeometryDash::RenderCollisionShapes = false;
+bool GeometryDash::EnableDebug = true;
 
 GeometryDash &GeometryDash::getInstance() { return S_instance; }
 

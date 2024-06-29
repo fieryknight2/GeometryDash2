@@ -253,7 +253,7 @@ void ArenaItem::render(const sf::Vector2f &cameraPos, sf::Color tint)
             shape.setPoint(2, std::dynamic_pointer_cast<TriangleCollider>(m_collision)->getTopPoint());
             if (m_collidedThisFrame)
             {
-                shape.setFillColor(sf::Color(255, 0, 0, 170));
+                shape.setFillColor(sf::Color(255, 40, 40, 150));
             }
             else
             {
@@ -270,7 +270,7 @@ void ArenaItem::render(const sf::Vector2f &cameraPos, sf::Color tint)
             shape.setFillColor(sf::Color::Transparent);
             if (m_collidedThisFrame)
             {
-                shape.setFillColor(sf::Color(255, 0, 0, 170));
+                shape.setFillColor(sf::Color(255, 0, 0, 100));
             }
             shape.setOutlineColor(sf::Color::Blue);
             shape.setOutlineThickness(1);

@@ -26,7 +26,11 @@ public:
     // Player &getPlayer() { return m_player; }
 
 private:
+#ifndef NDEBUG
     sf::Text m_fpsCounter;
+    sf::Text m_collisionCounter;
+    sf::Text m_processedCounter;
+#endif // NDEBUG
     sf::Font m_defaultFont;
 
     bool m_isPaused = false;

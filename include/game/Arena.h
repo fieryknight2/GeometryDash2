@@ -40,6 +40,12 @@ public:
 
     void resetPos();
 
+#ifndef NDEBUG
+    [[nodiscard]] int getCollisionsThisFrame() const { return m_collisions; }
+    [[nodiscard]] int getRenderedLastFrame() const { return m_rendered; }
+#else
+    [[nodiscard]] int getCollisionsThisFrame() { return 0; }
+#endif // NDEBUG
 private:
     sf::Vector2i m_size;
     sf::Vector2f m_viewportSize;
@@ -80,4 +86,9 @@ private:
     };
 
     void createWorld(const std::vector<TileSet> &set);
+
+#ifndef NDEBUG
+    size_t m_collisions = 0;
+    size_t m_rendered = 0;
+#endif // NDEBUG
 };

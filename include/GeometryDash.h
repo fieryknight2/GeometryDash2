@@ -26,6 +26,7 @@ public:
     sf::Time getDeltaTime() const { return m_deltaTime; }
 
     static bool RenderCollisionShapes;
+    static bool EnableDebug;
 
 private:
     // Singleton

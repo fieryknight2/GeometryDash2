@@ -410,26 +410,22 @@ ArenaItem *Arena::collidePlayer(const sf::FloatRect &shape)
     /* There is a potential edge case here not handled where the
      player collides with 2 tiles in the same frame, in that case it should
      just collide randomly and should not make a difference to the gameplay */
+#ifndef NDEBUG
+    m_collisions = 0;
+#endif // NDEBUG
     for (auto &arenaItem: m_objects)
     {
         // Only collide items in the viewport
-        if (arenaItem.getPosition().x > m_position.x + m_viewportSize.x + static_cast<float>(m_tileSize.x * 2) or
-            arenaItem.getPosition().x < m_position.x - m_viewportSize.x - static_cast<float>(m_tileSize.x * 2))
+        if (arenaItem.getPosition().x > m_position.x + m_viewportSize.x / 2 or
+            arenaItem.getPosition().x < m_position.x - m_viewportSize.x)
             continue;
-        if (arenaItem.getPosition().y > m_position.y + m_viewportSize.y + static_cast<float>(m_tileSize.y * 2) or
-            arenaItem.getPosition().y < m_position.y - m_viewportSize.y - static_cast<float>(m_tileSize.y * 2))
+        if (arenaItem.getPosition().y > m_position.y + m_viewportSize.y or
+            arenaItem.getPosition().y < m_position.y - m_viewportSize.y)
             continue;
 
-        // Shift the rect by m_position
-        // rect.top = (arenaItem.getPosition() + m_position).y;
-        // rect.left = (arenaItem.getPosition() + m_position).x;
-        // rect.width = arenaItem.getSize().x;
-        // rect.height = arenaItem.getSize().y;
-        //
-        // if (rect.intersects(shape))
-        // {
-        //     return &arenaItem;
-        // };
+#ifndef NDEBUG
+        ++m_collisions;
+#endif // NDEBUG
         if (arenaItem.collides(shape))
         {
             arenaItem.setRelativePosition(m_position);
@@ -461,15 +457,23 @@ void Arena::update()
 
 void Arena::render(const sf::Vector2f &cameraPos, sf::Color tint)
 {
+#ifndef NDEBUG
+    m_rendered = 0;
+#endif // NDEBUG
     for (auto &arenaItem: m_objects)
     {
+
         // Only render items that are in the viewport
-        // if (arenaItem.getPosition().x > m_position.x + m_viewportSize.x + static_cast<float>(m_tileSize.x * 2) or
-        //     arenaItem.getPosition().x < m_position.x - m_viewportSize.x - static_cast<float>(m_tileSize.x * 2))
-        //     continue;
-        // if (arenaItem.getPosition().y > m_position.y + m_viewportSize.y + static_cast<float>(m_tileSize.y * 2) or
-        //     arenaItem.getPosition().y < m_position.y - m_viewportSize.y - static_cast<float>(m_tileSize.y * 2))
-        //     continue;
+        if (arenaItem.getPosition().x > m_position.x + m_viewportSize.x + static_cast<float>(m_tileSize.x * 2) or
+            arenaItem.getPosition().x < m_position.x - m_viewportSize.x - static_cast<float>(m_tileSize.x * 2))
+            continue;
+        if (arenaItem.getPosition().y > m_position.y + m_viewportSize.y + static_cast<float>(m_tileSize.y * 2) or
+            arenaItem.getPosition().y < m_position.y - m_viewportSize.y - static_cast<float>(m_tileSize.y * 2))
+            continue;
+
+#ifndef NDEBUG
+        ++m_rendered;
+#endif // NDEBUG
 
         arenaItem.setRelativePosition(m_position);
         arenaItem.render(cameraPos, tint);
