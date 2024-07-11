@@ -21,8 +21,16 @@ int main(int argc, char *argv[])
     slog::SimpleLogger::GlobalLogger()->getLogger(3)->setMinLogLevel(slog::LogLevel::DEBUG);
 #endif // NDEBUG
 
+    // Load settings from file, maybe allow settings from command line args in the future?
+    GeometryDash::LoadSettings();
+
     // Run the game
-    GeometryDash::getInstance().run();
+    while (GeometryDash::getInstance().run())
+    {
+        GeometryDash::Reset();
+        // Run while the game is in a loop
+        GeometryDash::Restart = false;
+    }
 
     return 0; // Not necessary, just looks cleaner to me
 }

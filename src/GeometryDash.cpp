@@ -8,8 +8,16 @@
 GeometryDash GeometryDash::S_instance{};
 bool GeometryDash::RenderCollisionShapes = false;
 bool GeometryDash::EnableDebug = true;
+bool GeometryDash::EnableVSync = true;
+bool GeometryDash::Restart = false;
 
 GeometryDash &GeometryDash::getInstance() { return S_instance; }
+
+void GeometryDash::Reset()
+{
+    SL_LOG_INFO("Resetting GeometryDash");
+    S_instance.getWindow().destroy();
+}
 
 void GeometryDash::changeState(const std::shared_ptr<State> &state) noexcept(false)
 {
@@ -22,12 +30,14 @@ void GeometryDash::changeState(const std::shared_ptr<State> &state) noexcept(fal
     }
 }
 
-void GeometryDash::run() noexcept(false)
+void GeometryDash::LoadSettings() { EnableVSync = false; }
+
+bool GeometryDash::run() noexcept(false)
 {
     SL_LOG_INFO("Starting GeometryDash");
     SL_LOG_INFO("Creating Window");
 
-    m_window.create(WindowSettings({1200, 800}, "Geometry Dash", sf::Style::Titlebar | sf::Style::Close));
+    m_window.create(WindowSettings({1200, 800}, "Geometry Dash", EnableVSync, sf::Style::Titlebar | sf::Style::Close));
 
     SL_LOG_DEBUG("Creating Main Menu state");
     m_state = std::make_shared<MainMenuState>();
@@ -70,4 +80,6 @@ void GeometryDash::run() noexcept(false)
     SL_LOGF_DEBUG("Quitting from state {}", m_state ? m_state->getName() : "null");
     SL_LOG_DEBUG("Destroying Window");
     m_window.destroy();
+
+    return Restart;
 }

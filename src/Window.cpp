@@ -8,7 +8,7 @@ void Window::create(const WindowSettings &settings)
     // m_mode = sf::VideoMode::getDesktopMode();
     m_mode = sf::VideoMode(settings.size.x, settings.size.y);
     m_window.create(m_mode, settings.title, settings.flags);
-    m_window.setVerticalSyncEnabled(true);
+    m_window.setVerticalSyncEnabled(settings.vsync);
 }
 
 void Window::close()

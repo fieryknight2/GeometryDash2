@@ -187,3 +187,115 @@ void IconButton::setFrame(const int frame, const sf::Vector2i &frameCount)
     const auto framePos = sf::Vector2i(frame / frameCount.y, frame / frameCount.x);
     m_sprite.setTextureRect(sf::IntRect(framePos.x * frameSize.x, framePos.y * frameSize.y, frameSize.x, frameSize.y));
 }
+
+std::unique_ptr<sf::Texture> CheckButton::S_checkedUnchecked = nullptr;
+
+CheckButton::CheckButton(const sf::Vector2f &position, const sf::Vector2f &size, const std::string &text,
+                         const ButtonStyle &style)
+{
+    if (S_checkedUnchecked == nullptr)
+    {
+        S_checkedUnchecked = std::make_unique<sf::Texture>();
+        S_checkedUnchecked->loadFromFile("assets/icons/CheckBox.png");
+    }
+
+    m_position = position;
+
+    m_box.setPosition(position);
+    m_box.setTexture(*S_checkedUnchecked);
+
+    m_text.setFont(m_style.font);
+    m_text.setString(m_text.getString());
+    m_text.setFillColor(m_style.textColor);
+    if (m_style.textSize > 0)
+    {
+        // If the text size is set, ignore the padding
+        m_text.setCharacterSize(m_style.textSize);
+    }
+
+    resetTextPos();
+}
+
+CheckButton::CheckButton()
+{
+    // Ensure the texture is loaded
+    if (S_checkedUnchecked == nullptr)
+    {
+        S_checkedUnchecked = std::make_unique<sf::Texture>();
+        S_checkedUnchecked->loadFromFile("assets/icons/CheckBox.png");
+    }
+
+    m_box.setTexture(*S_checkedUnchecked);
+}
+
+void CheckButton::resetTextPos()
+{
+    m_text.setPosition(m_position +
+                       sf::Vector2f(S_checkedUnchecked->getSize().x / 2.0f + static_cast<float>(m_style.padding),
+                                    S_checkedUnchecked->getSize().y / 2.0f - m_text.getGlobalBounds().height));
+}
+
+void CheckButton::setPosition(const sf::Vector2f &position)
+{
+    m_position = position;
+    m_box.setPosition(position);
+    resetTextPos();
+}
+
+void CheckButton::setStyle(const ButtonStyle &style)
+{
+    m_style = style;
+
+    m_text.setFont(m_style.font);
+    m_text.setString(m_text.getString());
+    m_text.setFillColor(m_style.textColor);
+    if (m_style.textSize > 0)
+    {
+        // If the text size is set, ignore the padding
+        m_text.setCharacterSize(m_style.textSize);
+    }
+    resetTextPos();
+}
+
+void CheckButton::update()
+{
+    if (m_box.getGlobalBounds().contains(
+                sf::Vector2f(sf::Mouse::getPosition(GeometryDash::getInstance().getWindow().getWindow()))))
+    {
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            m_pressed = true;
+        }
+        else
+        {
+            if (m_pressed)
+            {
+                m_pressed = false;
+                m_checked = !m_checked;
+            }
+        }
+    }
+    else
+    {
+        if (m_pressed)
+        {
+            m_pressed = false;
+        }
+    }
+}
+
+void CheckButton::render()
+{
+    const sf::Vector2u size = m_box.getTexture()->getSize();
+    if (m_checked)
+    {
+        m_box.setTextureRect(sf::IntRect(0, 0, size.x / 2, size.y));
+    }
+    else
+    {
+        m_box.setTextureRect(sf::IntRect(size.x / 2, 0, size.x / 2, size.y));
+    }
+
+    GeometryDash::getInstance().getWindow().getWindow().draw(m_box);
+    GeometryDash::getInstance().getWindow().getWindow().draw(m_text);
+}

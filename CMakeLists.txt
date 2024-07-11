@@ -25,6 +25,7 @@ set(GEOMETRYDASH2_SOURCES
         include/game/Player.h
         include/AssetManager.h
         include/gui/Panel.h
+        include/OptionsState.h
 
         # Source Files
         src/AssetManager.cpp
@@ -38,6 +39,7 @@ set(GEOMETRYDASH2_SOURCES
         src/gui/Panel.cpp
         src/gui/Slider.cpp
         src/PlayState.cpp
+        src/OptionsState.cpp
         src/MainMenuState.cpp
         src/GeometryDash.cpp
         src/Window.cpp
@@ -46,6 +48,7 @@ set(GEOMETRYDASH2_SOURCES
 add_executable(GeometryDash2
         ${GEOMETRYDASH2_SOURCES}
         src/main.cpp
+        include/OptionsState.h
 )
 
 target_link_libraries(GeometryDash2 PRIVATE

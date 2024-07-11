@@ -14,8 +14,11 @@ class GeometryDash
 {
 public:
     static GeometryDash &getInstance();
+    ~GeometryDash() = default;
 
-    void run() noexcept(false);
+    static void LoadSettings();
+
+    bool run() noexcept(false);
 
     std::shared_ptr<State> getState() { return m_state; }
     void changeState(const std::shared_ptr<State> &state) noexcept(false);
@@ -27,6 +30,10 @@ public:
 
     static bool RenderCollisionShapes;
     static bool EnableDebug;
+    static bool EnableVSync;
+    static bool Restart;
+
+    static void Reset();
 
 private:
     // Singleton

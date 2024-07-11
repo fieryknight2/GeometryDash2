@@ -2,6 +2,7 @@
 
 #include "MainMenuState.h"
 #include "GeometryDash.h"
+#include "OptionsState.h"
 #include "PlayState.h"
 
 #include <cmath>
@@ -43,7 +44,11 @@ MainMenuState::MainMenuState()
     m_optionsButton.setText("Options");
     m_optionsButton.setStyle(mainMenuButtonStyle);
 
+#ifndef NDEBUG
     m_exitButton.setPosition(center + sf::Vector2f(-buttonWidth / 2.0f, buttonHeight * 1.25 - buttonHeight / 2.0f));
+#else // NDEBUG
+    m_exitButton.setPosition(center - sf::Vector2f(buttonWidth / 2.0f, buttonHeight / 2.0f));
+#endif // NDEBUG
     m_exitButton.setSize(sf::Vector2f(buttonWidth, buttonHeight));
     m_exitButton.setText("Quit");
     m_exitButton.setStyle(mainMenuButtonStyle);
@@ -60,7 +65,7 @@ MainMenuState::MainMenuState()
 void MainMenuState::update()
 {
     // Update the menu
-    m_avgFPS = static_cast<int>((std::floor(1000 / GeometryDash::getInstance().getDeltaTime().asMilliseconds())) +
+    m_avgFPS = static_cast<int>(std::floor(1000 / GeometryDash::getInstance().getDeltaTime().asMilliseconds()) +
                                 static_cast<float>(m_avgFPS)) /
                2;
     if (m_updateCount > 0.25)
@@ -73,8 +78,17 @@ void MainMenuState::update()
         m_updateCount += GeometryDash::getInstance().getDeltaTime().asSeconds();
     }
 
-    m_startButton.update();
+#ifndef NDEBUG
+
     m_optionsButton.update();
+    if (m_optionsButton.wasPressed())
+    {
+        GeometryDash::getInstance().changeState(std::make_unique<OptionsState>());
+    }
+
+#endif // NDEBUG
+
+    m_startButton.update();
     m_exitButton.update();
 
     if (m_exitButton.isActive())
@@ -89,10 +103,15 @@ void MainMenuState::update()
 
 void MainMenuState::render()
 {
-    GeometryDash::getInstance().getWindow().getWindow().draw(m_fpsCounter);
+    if (GeometryDash::EnableDebug)
+    {
+        GeometryDash::getInstance().getWindow().getWindow().draw(m_fpsCounter);
+    }
 
     // Render the menu
     m_startButton.render();
+#ifndef NDEBUG
     m_optionsButton.render();
+#endif // NDEBUG
     m_exitButton.render();
 }

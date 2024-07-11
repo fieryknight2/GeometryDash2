@@ -6,6 +6,7 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 #include "SFML/Graphics.hpp"
 
 struct ButtonStyle
@@ -116,4 +117,38 @@ private:
     bool m_wasPressed = false;
 
     std::function<void()> m_clickedCallback;
+};
+
+class CheckButton
+{
+public:
+    CheckButton(const sf::Vector2f &position, const sf::Vector2f &size, const std::string &text,
+                const ButtonStyle &style);
+    CheckButton();
+
+    void update();
+    void render();
+
+    void setText(const std::string &text) { m_text.setString(text); }
+    void setPosition(const sf::Vector2f &position);
+    void setStyle(const ButtonStyle &style);
+
+    sf::Vector2f getPosition() const { return m_position; }
+    std::string getText() const { return m_text.getString(); }
+    ButtonStyle getStyle() const { return m_style; }
+
+    bool isChecked() const { return m_checked; }
+    void setChecked(bool checked) { m_checked = checked; }
+
+private:
+    sf::Text m_text;
+    sf::Sprite m_box;
+    ButtonStyle m_style;
+    sf::Vector2f m_position;
+
+    bool m_checked = false;
+    bool m_pressed = false;
+
+    static std::unique_ptr<sf::Texture> S_checkedUnchecked;
+    void resetTextPos();
 };

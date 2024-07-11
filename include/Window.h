@@ -12,11 +12,13 @@ struct WindowSettings
 {
     sf::Vector2i size;
     std::string title;
+    bool vsync = true;
     uint32_t flags = sf::Style::Default;
 
     WindowSettings() = default;
-    WindowSettings(const sf::Vector2i &size, std::string title, const uint32_t flags = sf::Style::Default) :
-        size(size), title(std::move(title)), flags(flags)
+    WindowSettings(const sf::Vector2i &size, std::string title, const bool vsync,
+                   const uint32_t flags = sf::Style::Default) :
+        size(size), title(std::move(title)), vsync(vsync), flags(flags)
     {
     }
 };
