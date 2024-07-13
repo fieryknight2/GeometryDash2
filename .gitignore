@@ -31,6 +31,9 @@
 *.out
 *.app
 
+# Build files
+/build
+
 # Default log file
 /GeometryDash*.log
 
