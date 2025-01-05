@@ -17,6 +17,7 @@ public:
     ~GeometryDash() = default;
 
     static void LoadSettings();
+    static void SaveSettings();
 
     bool run() noexcept(false);
 

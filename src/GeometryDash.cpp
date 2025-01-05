@@ -1,15 +1,24 @@
 /* Created by Matthew Brown on 6/19/2024 */
 
+#include <filesystem>
 #include <format>
 
 #include "GeometryDash.h"
 #include "simplelogger.hpp"
 
+#include "tinyxml2.h"
+
 GeometryDash GeometryDash::S_instance{};
 bool GeometryDash::RenderCollisionShapes = false;
-bool GeometryDash::EnableDebug = true;
 bool GeometryDash::EnableVSync = true;
 bool GeometryDash::Restart = false;
+
+#ifndef NDEBUG
+bool GeometryDash::EnableDebug = true;
+#else
+// Change the default debug state to false in release builds
+bool GeometryDash::EnableDebug = false;
+#endif // NDEBUG
 
 GeometryDash &GeometryDash::getInstance() { return S_instance; }
 
@@ -30,7 +39,52 @@ void GeometryDash::changeState(const std::shared_ptr<State> &state) noexcept(fal
     }
 }
 
-void GeometryDash::LoadSettings() { EnableVSync = false; }
+void GeometryDash::LoadSettings()
+{
+    if (!std::filesystem::exists("settings.xml"))
+        return; // No settings file, nothing to load
+
+    SL_LOG_INFO("Loading settings");
+
+    tinyxml2::XMLDocument doc;
+    if (const tinyxml2::XMLError error = doc.LoadFile("settings.xml"); error != tinyxml2::XML_SUCCESS)
+    {
+        SL_LOGF_ERROR("Failed to load settings.xml: {}", doc.ErrorIDToName(error));
+        return;
+    }
+
+    const tinyxml2::XMLElement *root = doc.FirstChildElement("settings");
+    if (root == nullptr)
+    {
+        SL_LOG_ERROR("Failed to find root element in settings.xml");
+        return;
+    }
+
+    EnableVSync = root->BoolAttribute("EnableVSync");
+    EnableDebug = root->BoolAttribute("EnableDebug");
+    RenderCollisionShapes = root->BoolAttribute("EnableCollisionShapes");
+
+    SL_LOGF_DEBUG("Settings loaded: EnableVSync={}, EnableDebug={}, EnableCollisionShapes={}", EnableVSync, EnableDebug,
+                  RenderCollisionShapes);
+}
+
+void GeometryDash::SaveSettings()
+{
+    SL_LOG_INFO("Saving settings");
+    tinyxml2::XMLDocument doc;
+
+    // Create the root element
+    tinyxml2::XMLElement *root = doc.NewElement("settings");
+    doc.InsertFirstChild(root);
+
+    root->SetAttribute("EnableVSync", EnableVSync);
+    root->SetAttribute("EnableDebug", EnableDebug);
+    root->SetAttribute("EnableCollisionShapes", RenderCollisionShapes);
+
+    // Actually save the settings
+    if (const tinyxml2::XMLError error = doc.SaveFile("settings.xml"); error != tinyxml2::XML_SUCCESS)
+        SL_LOGF_ERROR("Failed to save settings.xml: {}", doc.ErrorIDToName(error));
+}
 
 bool GeometryDash::run() noexcept(false)
 {
