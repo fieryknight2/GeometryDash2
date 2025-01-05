@@ -10,11 +10,11 @@ using SDL, this version is improved and rewritten using SFML.
 
 ## Building
 
-Compile with CMake, which will automatically SFML, TinyXML, and SimpleLogger.
+Compile with CMake, which will automatically download SFML, TinyXML, and SimpleLogger.
 SFML has a few dependencies listed
 here: [SFML Dependencies](https://www.sfml-dev.org/tutorials/2.6/compile-with-cmake.php)
 
 ## Running
 
 You can run the executable from the build directory or from the project directory
-as CMake will automatically copy the assets to the build directory (this will change in the future).
+as CMake will automatically copy the assets to the build directory (this may change in the future).
