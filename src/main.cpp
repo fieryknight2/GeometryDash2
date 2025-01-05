@@ -32,5 +32,7 @@ int main(int argc, char *argv[])
         GeometryDash::Restart = false;
     }
 
+    GeometryDash::SaveSettings();
+
     return 0; // Not necessary, just looks cleaner to me
 }
